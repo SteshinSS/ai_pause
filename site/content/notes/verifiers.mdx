@@ -1,0 +1,72 @@
+---
+title: The Verifier Bottleneck
+symbols: true
+---
+
+An AI pause assumes that we don't fully trust AI. Even if AI can automate AI safety research, it's likely humans will verify it and limit what AI can do autonomously. For very capable AI, research might be bottlenecked by humans' ability to keep up with it and verify it.
+
+In our model, each paper the AI writes gets $m_h$ verifiers: they read it, review or re-implement the code, and re-run the main experiments once. Only papers that were checked and reproduced count. In [Compartmentalization](note:model-explanations#compartmentalization), the same people also approve the AI researcher's plans.
+
+## We Need to Hire a Lot
+
+We don't know how many verifiers there will be during a pause, so we modeled two hiring strategies:
+- Hiring is frozen at the start of the pause.
+- Hiring is unlimited, so labs hire as many people as they need to verify AI.
+
+For comparison, there were 21,921 reviewers at NeurIPS, the top ML conference, in 2025.
+
+In [Results Verification](note:model-explanations#results-verification), if you let AI do research autonomously and verify only the results, strong AI produces a lot of research. By the end of a 9-year pause at TED-AI, you need to hire 2.7 million verifiers. If you pause at AC, you need only 100k.
+
+<HiringPlot model="verified">
+<span data-axis>people to hire $N_h$</span>
+
+**Results Verification.** AI is autonomous. The labs hire verifiers to review and re-run every paper.
+
+</HiringPlot>
+
+With [Compartmentalization](note:model-explanations#compartmentalization), you contain AI more and only let the AC write the code. It reduces total research, but after about three and a half years you will still need to hire new people. By the end of a 9-year pause, you need ~150k more verifiers.
+
+<HiringPlot model="compartmentalized">
+<span data-axis>people to hire $N_h$</span>
+
+**Compartmentalization.** The labs hire people to plan and check every paper. It applies from <Milestone>SAR</Milestone> on.
+
+</HiringPlot>
+
+With [Workload Approval](note:model-explanations#workload-approval), the labs never need to hire. The labs are bottlenecked by [auditors](#auditors), who let only as much code run as they can read, so the labs' own staff can plan and check all the papers.
+
+## We Have a Lot of AI Safety without Hires
+
+We might need a lot of humans to verify all the papers. But papers aren't equally important, and humans review the most important ones first. If the labs' own staff verify the best papers, how much do we lose by not hiring? Less than you might think.
+- In the most impressive scenario (Results Verification, TED-AI, nine years), hiring up to 2.7M verifiers yields 129% more AI safety research.
+- In a safer and more realistic scenario (Compartmentalization, SAR, nine years), hiring an additional 131k verifiers yields only 20% more AI safety research.
+
+<HiringCurve>
+<span data-axis>AI safety years</span>
+<span data-x>people to hire $N_h$</span>
+
+AI safety years when the labs can hire at most this many people on top of their own staff.
+
+</HiringCurve>
+
+Still, each hire is worth much more than in 2025. On average, one hired verifier produces as much research as 15–420 human scientists did in 2025 (420 in Compartmentalization for a 9-year TED-AI pause).
+
+This relies on verifiers telling the most important papers apart. If they can't and check a random sample instead, a nine-year Compartmentalization pause from <Milestone>SAR</Milestone> loses almost 30% of its AI safety years, and to match verifiers who pick the best papers, the labs have to hire 43,000 people. See [Random Checks](note:random-checks).
+
+## Auditors
+
+[Workload Approval](note:model-explanations#workload-approval) adds one more group of humans who check AI's work. As in AI 2040's Plan A, auditors outside the labs read the AI engineer's code and approve it before it runs, so the labs run only as much code as the auditors can read. We don't know how many auditors a pause would have. We fixed a big but realistic <Value input="N_a" /> auditors (see [rationale](note:parameters)). They remain the biggest bottleneck, reducing the research stock to 23%–41% of Compartmentalization's.
+
+<AuditorCurve>
+<span data-axis>AI safety years</span>
+<span data-x>auditors $N_a$</span>
+
+AI safety years with $N_a$ auditors. Dots mark the Workload Approval table's <Value input="N_a" /> auditors.
+
+</AuditorCurve>
+
+## Faster Verifiers
+
+Usually, researchers are rewarded for discoveries, but here AI does nearly all the science. So we recommend rewarding verifiers for finding mistakes in AI work.
+
+In our model, checks that are twice as fast are worth as much as twice as many verifiers. See two [Epistemic AI projects](note:epistemic-ai) that could make verifiers faster.

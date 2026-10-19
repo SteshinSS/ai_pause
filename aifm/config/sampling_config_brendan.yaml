@@ -1,0 +1,101 @@
+# Brendan's sampling configuration
+# Inherits all settings from sampling_config.yaml and overrides specific parameters
+
+parent: "sampling_config.yaml"
+
+# Global settings (time_range, input_data, per_sample_timeout, num_rollouts) are
+# inherited from sampling_config.yaml. Override them here only to diverge from it.
+
+# ============================================================================
+# PARAMETER OVERRIDES
+# ============================================================================
+# To override parameters, uncomment the 'parameters:' section below and add
+# the specific parameters you want to change.
+#
+# Example usage:
+#
+# parameters:
+#   present_day:
+#     dist: fixed
+#     value: 2026.0
+#   include_gap:
+#     dist: choice
+#     values: ["no gap", "gap"]
+#     p: [0.3, 0.7]  # 70% chance of gap instead of 55%
+#
+# ============================================================================
+
+parameters:
+  ac_time_horizon_minutes:
+      dist: fixed
+      value: 80 # slightly above present_horizon (69.9 min) to avoid glitches
+  gap_years:
+      dist: lognormal
+      ci80: [0.5, 10] # progress-years beyond ac_time_horizon_minutes
+      min: 0.0
+      max: 1e30
+  present_doubling_time:
+      dist: lognormal
+      ci80: [0.2117, 0.5233] # [2.54, 6.28] months, 4 month median
+      min: 0.01
+      max: 2
+  include_gap:
+    dist: fixed
+    value: "gap"
+  # doubling_difficulty_growth_factor:
+  #   dist: normal
+  #   ci80: [0.9, 1.1] # shifted from Eli [0.82, 1.02], median 1.0
+  rho_coding_labor:
+    dist: choice
+    values: [-2, -1, -0.5] # shifted from Eli [-5, -2, -1], median -1
+    p: [0.25, 0.5, 0.25]
+  # parallel_penalty:
+  #   dist: beta
+  #   alpha: 4.5
+  #   beta: 1.5
+  #   min: 0.0  # same concentration as Eli beta(3,3), shifted median to ~0.75
+  #   max: 1.0
+  automation_logistic_asymptote:
+    dist: shifted_lognormal
+    ci80: [0.0007, 0.3] # same log-spread as Eli [0.005, 2], median 1.015
+    shift: 1.0
+    min: 1.0
+  coding_automation_efficiency_slope:
+    dist: lognormal
+    ci80: [0.83, 7.5] # same log-spread as Eli [1, 9], median 2.5
+    min: 0.1
+    max: 10
+  ted_ai_m2b:
+    dist: lognormal
+    ci80: [0.8, 11.2] # same log-spread as Eli [0.4, 5.6], median 3.0
+    min: 0.01
+    max: 100
+
+# ============================================================================
+# TIME SERIES PARAMETER OVERRIDES
+# ============================================================================
+# To override time series parameters:
+#
+# time_series_parameters:
+#   slowdown_year:
+#     dist: uniform
+#     min: 2024.0
+#     max: 2027.0
+#
+# ============================================================================
+
+# ============================================================================
+# CORRELATION MATRIX OVERRIDE
+# ============================================================================
+# To override the correlation matrix (replaces entire matrix):
+#
+# correlation_matrix:
+#   parameters:
+#     - "present_doubling_time"
+#     - "doubling_difficulty_growth_factor"
+#   correlation_matrix:
+#     - [1.00, 0.50]
+#     - [0.50, 1.00]
+#   correlation_type: "spearman"
+#
+# ============================================================================

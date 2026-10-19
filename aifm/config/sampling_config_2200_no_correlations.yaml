@@ -1,0 +1,10 @@
+# 2200 sampling configuration WITHOUT correlations
+# Inherits all settings from sampling_config.yaml (which carries the 2200 horizon)
+# but disables parameter correlations
+
+parent: "sampling_config.yaml"
+
+# Disable correlations by providing empty correlation_matrix
+# (empty dict overrides parent's correlation_matrix, and the sampling code
+# skips correlation logic when parameters list is empty)
+correlation_matrix: {}

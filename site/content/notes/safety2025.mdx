@@ -1,0 +1,91 @@
+---
+title: 2025 AI Safety Work
+numbered: true
+---
+
+<Backdrop id="safety2025" top />
+
+# AI Safety
+
+AI safety is an overloaded term. Here we mean experimental research that improves our understanding of AI and helps predict its behavior:
+- Interpretability and explainability
+- Adversarial robustness
+- Science of deep learning (generalization, memorization, training dynamics)
+- Jailbreaks, red-teaming, prompt injection and safeguards
+- Alignment experiments (reward hacking, deception, model organisms, oversight, chain of thought)
+- Unlearning
+- Dangerous-capability evaluations and AI control
+
+We don't mean:
+- Theoretical work (agent foundations, philosophy, decision theory, timeline modeling, economics, surveys)
+- Governance
+- Privacy, fairness, watermarks
+- Preference learning
+- Capability prediction
+
+We appreciate theoretical work and think it's likely to become a bottleneck once everything else is automated, but it seems to be quite a small part of 2025 AI safety work.
+
+Governance is important (that's basically our message), but here we focus on the technical understanding of AI.
+
+# AI Safety Papers Dataset
+
+For the analysis, we collected a [dataset](note:aisafety-papers) of 2020–2025 AI safety papers.
+
+Here we explain how we made point estimates for 2025 safety compute $C_s$, 2025 safety headcount $N_s$ and the 2025 research stock $RS_s$.
+
+## Compute
+
+2025 AI safety compute comes from two sources:
+- AI labs
+- External AI R&D that doesn't improve capabilities
+
+### AI Labs
+- [AI 2027](https://ai-2027.com/research/compute-forecast): 1% of AI lab compute. According to [Epoch](https://epoch.ai/data/ai-chip-users), the three labs together had 2.3M H100e-years in 2025. That gives 23,000 H100e-years.
+- [Rohin Shah](https://www.lesswrong.com/posts/WSNnKcKCYAffcnrt2?commentId=NHpqQodRJBaCjjvoB) (head of AGI Safety and Alignment at Google DeepMind): a safety team with 1% of the headcount would get ~0.3% of the compute. With the labs' actual safety headcount shares, that gives ~20,000.
+- Four people told [The New Yorker](https://www.newyorker.com/magazine/2026/04/13/sam-altman-may-control-our-future-can-he-be-trusted) that OpenAI's Superalignment team got 1–2% of the company's compute. The same share at each lab gives 23,000–46,000.
+
+We take 25,000 H100e-years.
+
+### Everything Else
+We assume that if AI safety research used significant compute, the authors most likely published it on arXiv. This somewhat underestimates the compute actually used, but likely not by much.
+
+We took the 7,260 AI safety papers first posted in 2025 from our dataset and dropped the 198 with an author at OpenAI, Anthropic or Google, or from the Anthropic Fellows program: their compute is already in the labs' share. The remaining 7,062 papers used 2,005 H100e-years, dead ends included.
+
+Some projects fail as a whole and never become papers. The labs' share already includes their failed projects, but here we need to account for them with $M$ = 1.2 (see [rationale](note:parameters)): 1.2 × 2,005 = 2,406 H100e-years.
+
+We estimate total AI safety compute in 2025 at $C_s$ = 25,000 + 2,406 = 27,406 H100e-years.
+
+## Labor
+
+Similarly:
+
+### AI Labs
+
+There were ~200 FTEs at OpenAI, Anthropic and Google DeepMind working on safety-related research.
+
+### Everything Else
+
+It's hard to estimate the number of FTEs working on AI safety in 2025.
+
+Both methods below leave out papers from the AI labs.
+
+#### Prolific Authors
+We took all the authors of AI safety papers and counted those with three or more papers in 2025. On the one hand, this method drops the fractional FTEs of researchers who published fewer than three papers. On the other hand, some authors coauthored three papers without being full-time AI safety researchers: researchers who mostly did other research, PIs, managers and engineers. We still count each of them as 1 FTE.
+
+This method gives 1,783 FTEs in 2025.
+
+#### GPUs per Author
+
+There are estimates of GPUs per researcher. Let's take them and divide the compute outside the AI labs, failed projects included, by them:
+- 1 H100e-year per researcher: 2,406 researchers
+- 0.5 H100e-years per researcher: 4,812 researchers
+
+Since we use fail-adjusted compute, this method counts FTEs who didn't publish much because their projects failed.
+
+We aren't sure about these methods. We take the bigger estimate because it makes our results less interesting: we err on the boring side.
+
+Together with the AI labs: $N_s$ = 5,012 FTE-years.
+
+## 2025 AI Safety Work $RS_s$
+
+Putting these into the CES $X(t)$, we get $RS_s$ = 493.

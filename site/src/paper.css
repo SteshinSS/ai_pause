@@ -1,0 +1,389 @@
+/* The PDF's page (src/paper.tsx, scripts/pdf.mjs): the site's text styles (styles.css, .pane-body) on white paper at
+   11 pt, 6.5 in (624 px) wide. The page looks the same on screen and in print, so the plots and diagrams, which measure
+   their width on screen, keep it in print. Letter pages with 1 in margins (scripts/pdf.mjs). */
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #fff;
+}
+
+body {
+  width: 624px;
+  margin: 0 auto;
+}
+
+/* ---------- title page: Google Scholar reads the largest text on the first page as the title, the line under it as
+   the authors ---------- */
+
+.pdf-title {
+  padding-top: 1.1in;
+  text-align: center;
+  break-after: page;
+}
+
+.pdf-title-text {
+  margin: 0 0 0.55in;
+  font-size: 26pt;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+.pdf-authors {
+  display: flex;
+  justify-content: center;
+  gap: 0.7in;
+}
+
+.pdf-author-name {
+  font-size: 16pt;
+  line-height: 1.3;
+}
+
+.pdf-author-affiliation,
+.pdf-date {
+  margin-top: 0.3em;
+  font-size: 11pt;
+  color: var(--muted);
+}
+
+.pdf-date {
+  margin-top: 0.35in;
+}
+
+.pdf-abstract {
+  max-width: 5in;
+  margin: 0.7in auto 0;
+  text-align: left;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+.pdf-abstract-label {
+  margin: 0 0 0.6em;
+  font: 500 9pt/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--muted);
+}
+
+.pdf-abstract p {
+  margin: 0;
+}
+
+.pdf-site {
+  margin-top: 0.5in;
+  font-size: 10pt;
+  color: var(--muted);
+}
+
+.pdf-title a,
+.pdf-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.pdf-author-name a {
+  color: inherit;
+}
+
+/* ---------- the text ---------- */
+
+.pane-body.pdf-body {
+  --pad-x: 0px;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  font-size: 11pt;
+  line-height: 1.45;
+  counter-reset: figure table;
+}
+
+.pdf-body::before,
+.pdf-body::after {
+  content: none;
+}
+
+/* Headings stay with what follows them; the appendix starts a page. */
+.pdf-body h1 {
+  font-size: 1.75em;
+}
+
+.pdf-body * + h1 {
+  margin-top: 2em;
+}
+
+.pdf-appendix {
+  break-before: page;
+}
+
+.pdf-body h2 {
+  font-size: 1.35em;
+}
+
+.pdf-body h3 {
+  font-size: 1.12em;
+}
+
+.pdf-body h4 {
+  margin: 1.4em 0 0.4em;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.pdf-body h5 {
+  margin: 1.2em 0 0.4em;
+  font-size: 1em;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.pdf-body :is(h1, h2, h3, h4, h5) {
+  break-after: avoid;
+}
+
+.pdf-body :is(figure, figcaption, .flow-frame, .katex-display, .unused, li, tr) {
+  break-inside: avoid;
+}
+
+.pdf-body p {
+  orphans: 3;
+  widows: 3;
+}
+
+/* Tables and figures numbered, as in a paper. */
+.pdf-body figure.result-table {
+  counter-increment: table;
+}
+
+.pdf-body figure.result-table > figcaption::before {
+  content: 'Table ' counter(table) '. ';
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* A diagram counts on its frame: the frame is a container (styles.css), which keeps counts made inside it. */
+.pdf-body :is(figure.paper-plot, .flow-frame) {
+  counter-increment: figure;
+}
+
+.pdf-body figure > figcaption > p:first-child {
+  display: inline;
+}
+
+.pdf-body :is(figure.paper-plot, figure.flow) > figcaption::before {
+  content: 'Figure ' counter(figure) '. ';
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* The capability levels: text, left-aligned, the definitions taking the room. */
+.pdf-body .pdf-levels table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.9em;
+}
+
+.pdf-body .pdf-levels :is(th, td) {
+  text-align: left;
+  vertical-align: baseline;
+  white-space: normal;
+}
+
+.pdf-body .pdf-levels :is(th, td):nth-child(1) {
+  width: 31%;
+}
+
+.pdf-body .pdf-levels :is(th, td):nth-child(2) {
+  width: 15%;
+}
+
+/* The site's popup terms (a milestone in a table row, a † on a cell) as plain text. */
+.pdf-body .gloss-term {
+  border: 0;
+  background: none;
+  text-decoration: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  cursor: default;
+}
+
+.pdf-mark {
+  margin-top: 0.6em;
+  break-inside: avoid;
+}
+
+/* The plots' menus and sliders, read as the label of what the plot shows. */
+.pdf-body .hiring-curve-select select {
+  min-height: 0;
+  max-width: none;
+  padding: 0 0 0 1px;
+  text-overflow: clip;
+  border: 0;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pdf-body .hiring-curve-select::after {
+  content: none;
+}
+
+.pdf-body .plot-slider input {
+  display: none;
+}
+
+.pdf-body .plot-slider-value {
+  min-width: 0;
+  font-size: 10px;
+}
+
+/* A formula AIFM has or that shows the logic behind one: its label as a small grey line above it. */
+.pdf-body .unused-label {
+  font: 500 9px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- footnotes, citations, notes, references ---------- */
+
+.pdf-fn-text,
+.pdf-ref {
+  display: none;
+}
+
+.pdf-fn-ref {
+  margin-left: 0.1em;
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+.pdf-notes,
+.pdf-references {
+  font-size: 0.92em;
+}
+
+.pdf-notelist {
+  padding-left: 2.2em;
+}
+
+.pdf-notelist li {
+  margin-bottom: 0.6em;
+}
+
+.pdf-notelist li p,
+.pdf-notelist li ul,
+.pdf-notelist li blockquote {
+  margin: 0 0 0.4em;
+}
+
+.pdf-reflist p {
+  margin: 0 0 0.55em;
+  padding-left: 1.6em;
+  text-indent: -1.6em;
+  break-inside: avoid;
+}
+
+/* ---------- Appendix A: the parameters, their rationale unfolded under each ---------- */
+
+.pdf-appendix > h1::before {
+  content: 'A';
+  margin-right: 0.6em;
+  font-family: var(--mono);
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+.pdf-body .parameter-table td:first-child {
+  font-size: 0.9em;
+}
+
+.pdf-body .parameter-table td:nth-child(2) {
+  font-size: 1em;
+}
+
+.pdf-body .parameter-table .range {
+  font-size: 0.9em;
+}
+
+.pdf-body .parameter-table tbody th {
+  font-size: 1.1em;
+}
+
+.pdf-body .parameter-table tr.pdf-param-why {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.pdf-body .parameter-table tr.pdf-param-why td {
+  grid-column: 1 / -1;
+  font-size: 0.92em;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.pdf-body .parameter-table tr.pdf-param-why td > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- the result tables, in the text's size ---------- */
+
+.pdf-body .result-table table {
+  font-size: 0.95em;
+}
+
+.pdf-body .result-table tbody :is(th, td) {
+  padding-top: 0.45em;
+  padding-bottom: 0.45em;
+}
+
+.pdf-body .result-table :is(figcaption, .result-table-note) {
+  font-size: 0.88em;
+}
+
+.pdf-body .result-table-title {
+  margin-top: 1.2em;
+}
+
+.pdf-body .result-table-title:first-child {
+  margin-top: 0;
+}
+
+/* Long tables may run on to the next page between their rows (Chrome repeats their heads); a result table's own
+   staff, unlimited hiring and people to hire may part, each with its title. */
+.pdf-body figure.pdf-levels,
+.pdf-body figure.pdf-table {
+  break-inside: auto;
+}
+
+.pdf-body .pdf-table .result-table-scroll {
+  break-inside: avoid;
+}
+
+.pdf-body .result-table-title {
+  break-after: avoid;
+}
+
+/* A caption and a table's notes stay with the table. */
+.pdf-body :is(.pdf-levels, .pdf-table) > :is(figcaption, .pdf-mark, .result-table-note) {
+  break-before: avoid;
+}
+
+/* A long rationale may run on to the next page, starting on the page of its parameter. */
+.pdf-body .parameter-table tr.pdf-param {
+  break-after: avoid;
+}
+
+.pdf-body .parameter-table tr.pdf-param-why {
+  break-inside: auto;
+}

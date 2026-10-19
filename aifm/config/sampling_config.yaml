@@ -1,0 +1,258 @@
+# Default sampling configuration.
+#
+# This is the inheritance root for every other config and the sole definition of
+# the input series. The former `sampling_config_2200.yaml` was folded into this
+# file: it was a 90-line wrapper whose only live content was the full-horizon
+# time_range and a larger per-sample timeout, which meant every forecast config
+# had to remember to parent it. Forgetting cost a 10k run once — see the note in
+# sampling_config_q2_eli.yaml about run 20260807_212832, which parented the 2050
+# base and right-censored slow rollouts ~150 years early.
+#
+# The horizon is 2200 because milestones in slow rollouts (ASI in particular)
+# land well past 2050; truncating at 2050 silently censors them. This costs
+# ~3x per trajectory and ~4x artifact size versus a 2050 horizon.
+initial_progress: 0.0
+time_range: [2017.0, 2200.0]
+
+num_rollouts: 1000
+input_data: inputs/input_data.csv
+per_sample_timeout: 30
+
+parameters:
+  # Automated coder time horizon + extrapolation
+  ac_time_horizon_minutes:
+    dist: lognormal
+    ci80: [12000, 1.875e10] # [.1 work year, 156,250 work years]
+    min: 960 # demand that automated coder have a time horizon of at least 16 hours, which is the length of the longest existing METR tasks
+    max: 1e11
+  horizon_extrapolation_type:
+    dist: fixed
+    value: decaying doubling time
+
+  # Gaps mode
+  include_gap:
+    dist: choice
+    values: ["no gap", "gap"]
+    p: [0.7, 0.3]
+  gap_years:
+    dist: lognormal
+    ci80: [0.1, 4.9]
+    min: 0.0
+    max: 1e30
+
+  # Horizon trend
+  present_day:
+    dist: fixed
+    value: 2026.0959 # Claude Opus 4.6
+  present_horizon:
+    dist: fixed
+    value: 69.9
+  present_doubling_time:
+    dist: lognormal
+    ci80: [0.1833, 0.7667] # 4.5 month median, 2.2 to 9.2
+    min: 0.01
+    max: 2
+  doubling_difficulty_growth_factor:
+    dist: normal
+    ci80:
+    - 0.82  
+    - 1.02  
+    min: 0.6
+    max: 1.02
+
+  # coding labor
+  rho_coding_labor:
+    dist: choice
+    values: [-5, -2, -1]
+    p: [0.25, 0.5, 0.25]
+
+  # experiment capacity
+  inf_compute_asymptote:
+    dist: shifted_lognormal
+    ci80: [25, 40000]
+    shift: 1.0
+    min: 1.0
+    max: 1e7
+  inf_labor_asymptote:
+    dist: shifted_lognormal
+    ci80: [1, 200]
+    shift: 1.0
+    min: 1.0
+    max: 1e5
+  inv_compute_anchor_exp_cap:
+    dist: shifted_lognormal
+    ci80: [0.7, 4.6]
+    shift: 1.0
+    min: 1.0
+    max: 10
+  parallel_penalty:
+    dist: beta
+    alpha: 3
+    beta: 3
+    min: 0.0
+    max: 1.0
+
+  # coding automation
+  #
+  # CURRENT AI CODING UPLIFT — Q2 2026 elicitation, Eli's column, uplift block,
+  # data vintage 2026.578082.
+  #
+  # SUPERSESSION. This block replaces
+  #     swe_multiplier_at_present_day:
+  #       dist: shifted_lognormal
+  #       ci80: [0.25, 4]      # excess, PARALLEL space, at present_day
+  #       shift: 1.0
+  #       min: 1.0
+  #       max: 10
+  # which stated the same physical quantity in the older container: parallel
+  # space, at present_day, with no reference date of its own. The two containers
+  # are one quantity (see progress_model/parameters.py, "The uplift pair"), and
+  # the model now treats the serial/dated one as the source of truth, so keeping
+  # the old row would have meant sampling the derived view and back-converting
+  # it date-blind.
+  #
+  # The two are close in the body, which is why this is a container change
+  # rather than a belief change. At the medians (parallel 2.0x, pp 0.5, D 6.5
+  # months) the old row converts forward to a serial excess of
+  #   (2.0 ** 0.5 - 1) * 2 ** ((2026.578082 - 2026.0959) * 12 / 6.5) = 0.768
+  # against the Q2 median excess of 0.70 — 9.7% high. Measured over 4000 joint
+  # draws (converting the old row forward with the sampled pp and D), serial
+  # level p10/p50/p90 is 1.174/1.822/5.868 for the old row against
+  # 1.098/1.734/5.915 for this one: within 1% at p90, ~12% high at the median,
+  # and materially higher only in the lower tail, where the old container's
+  # floor (parallel excess min 0) and the parallel_penalty spread bite.
+  #
+  # NOTE: every child config inherits this, so every child's MC output moves.
+  # That is intended.
+  #
+  # shifted_lognormal with shift 1.0 puts the lognormal over the EXCESS (M-1),
+  # which is the quantity that has a doubling time. Eli 1.1/1.7/5.9 => excess
+  # 0.1/0.7/4.9, and geomean(0.1, 4.9) = 0.7, so all three elicited quantiles
+  # are reproduced exactly.
+  serial_uplift_at_reference_date:
+    dist: shifted_lognormal
+    ci80: [0.1, 4.9]
+    shift: 1.0
+    min: 1.01
+    max: 1000
+  # D: doubling time of the excess uplift (M-1) at the reference date, in
+  # months. Eli 2/6.5/21.13 (the 90th revised from 31.25 so the triple is
+  # log-symmetric: geomean(2, 21.13) = 6.5), so all three quantiles are exact.
+  # Used in EVERY ac_anchor_mode: it sets the excess-growth factor that dates
+  # the uplift belief, and it is the doubling-rate condition the 'uplift-solved'
+  # mode imposes.
+  excess_uplift_doubling_time:
+    dist: lognormal
+    ci80: [2.0, 21.13]
+    min: 0.6
+    max: 240
+  # The uplift elicitation has its own vintage date, later than the other
+  # observables' present_day anchor (2026.0959). Held fixed, not sampled.
+  uplift_reference_date:
+    dist: fixed
+    value: 2026.578082
+  coding_automation_efficiency_slope:
+    dist: lognormal
+    ci80: [1, 9]
+    min: 0.1
+    max: 10
+  max_serial_coding_labor_multiplier:
+    dist: lognormal
+    ci80: [1e4, 1e12]
+    min: 1.0
+    max: 1e30
+  automation_interp_type:
+    dist: fixed
+    value: "logistic"
+  automation_logistic_asymptote:
+    dist: shifted_lognormal
+    ci80: [0.005, 2]
+    shift: 1.0
+    min: 1.0
+    max: 1e30
+
+  # Research taste dynamics (mixed distributions with rank correlation)
+  ai_research_taste_at_coding_automation_anchor_sd:
+    dist: normal
+    ci80: [-2.5, 3.5]
+    min: -10
+    max: 10
+  ai_research_taste_slope:
+    dist: lognormal
+    ci80: [0.7, 6.3]
+    min: 0.1
+    max: 10
+  median_to_top_taste_multiplier:
+    dist: shifted_lognormal
+    ci80: [0.7, 10.4] # on the lognormal part
+    shift: 1.0
+    min: 1.01
+    max: 100
+  taste_limit:
+    dist: lognormal
+    ci80: [2, 32]
+    min: 0
+    max: 100
+  taste_limit_smoothing:
+    dist: beta
+    alpha: 2
+    beta: 2
+    min: 0.001
+    max: 0.999
+
+  # Software efficiency growth rate in reference year (2024)
+  software_progress_rate_at_reference_year:
+    dist: lognormal
+    ci80: [0.4, 2.5]
+    min: 0.05
+    max: 10
+
+  # Translation to general capability milestones
+  ted_ai_m2b:
+    dist: lognormal
+    ci80: [0.4, 5.6]
+    min: 0.01
+    max: 100
+
+# Correlation matrix specification
+# This creates correlations between related parameters
+correlation_matrix:
+  parameters:
+    - "present_doubling_time"
+    - "doubling_difficulty_growth_factor"
+    - "ai_research_taste_slope"
+    - "ai_research_taste_at_coding_automation_anchor_sd"
+    - "gap_years"
+    - "ac_time_horizon_minutes"
+    - "coding_automation_efficiency_slope"
+    - "inv_compute_anchor_exp_cap"
+    - "inf_compute_asymptote"
+  correlation_matrix:
+    - [ 1.00,  0.60, -0.30,  0.00,  0.00,  0.00, -0.15,  0.00,  0.00] # present_doubling_time
+    - [ 0.60,  1.00, -0.30,  0.00,  0.30, -0.50, -0.10,  0.00,  0.00] # doubling_difficulty_growth_factor
+    - [-0.30, -0.30,  1.00,  0.30,  0.00,  0.00,  0.00,  0.00,  0.00] # ai_research_taste_slope
+    - [ 0.00,  0.00,  0.30,  1.00,  0.00,  0.00,  0.00,  0.00,  0.00] # ai_research_taste_at_coding_automation_anchor_sd
+    - [ 0.00,  0.30,  0.00,  0.00,  1.00,  0.00,  0.00,  0.00,  0.00] # gap_years
+    - [ 0.00, -0.50,  0.00,  0.00,  0.00,  1.00,  0.00,  0.00,  0.00] # ac_time_horizon_minutes
+    - [-0.15, -0.10,  0.00,  0.00,  0.00,  0.00,  1.00,  0.00,  0.00] # coding_automation_efficiency_slope
+    - [ 0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  1.00,  0.50] # inv_compute_anchor_exp_cap (marginal behavior)
+    - [ 0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.50,  1.00] # inf_compute_asymptote (C_inf)
+  correlation_type: "spearman"
+# Input time series uncertainty
+# These parameters control the generation of time series data with uncertainty
+# time_series_parameters:
+#   constant_training_system_performance_growth_rate:
+#     dist: normal
+#     ci80: [0.55, 0.65]  # Training compute growth rate before slowdown
+#     min: 0.0
+#     max: 2.0
+#   slowdown_year:
+#     dist: uniform
+#     min: 2026.0
+#     max: 2030.0
+#     clip_to_bounds: false
+#   post_slowdown_training_system_performance_growth_rate:
+#     dist: normal
+#     ci80: [0.15, 0.35]  # Training compute growth rate after slowdown
+#     min: 0.0
+#     max: 2.0

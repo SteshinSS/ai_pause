@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f0f0ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131313" media="(prefers-color-scheme: dark)" />
+    <!-- Made by scripts/icons.mjs, as is the preview picture -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>1000 Years of AI Safety</title>
+    <meta name="description" content="A three-year AI pause could buy 1000 years' worth of AI safety work: a model of safety research during a pause, done by AI and verified by humans." />
+    <!-- Link previews (X, Slack, Telegram, LinkedIn, ...); scripts/prerender.mjs adds og:url, the canonical address and
+         the picture, and gives each note's page its own title and search-result description. -->
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="1000 Years of AI Safety" />
+    <meta property="og:description" content="A three-year AI pause could buy 1000 years' worth of AI safety work: a model of safety research during a pause, done by AI and verified by humans." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:image:alt" content="An obedient mask, an unreadable face behind it." />
+    <meta name="twitter:image:alt" content="An obedient mask, an unreadable face behind it." />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ScholarlyArticle",
+        "headline": "1000 Years of AI Safety",
+        "description": "A three-year AI pause could buy 1000 years' worth of AI safety work: a model of safety research during a pause, done by AI and verified by humans.",
+        "inLanguage": "en",
+        "datePublished": "2026-10-05",
+        "author": [
+          {
+            "@type": "Person",
+            "name": "Simon Steshin",
+            "url": "https://stesh.in/",
+            "affiliation": { "@type": "Organization", "name": "Sage Future", "url": "https://sage-future.org/" }
+          },
+          { "@type": "Person", "name": "Grigory Reznikov" }
+        ]
+      }
+    </script>
+    <!-- Google Scholar: the work to cite is the PDF (npm run pdf), with the title, authors and date of its first page
+         (paper/paper.mdx). Only the main page has these; scripts/prerender.mjs leaves them out of the note pages. -->
+    <meta name="citation_title" content="1000 Years of AI Safety: A Model of AI Safety Research during an AI Pause" />
+    <meta name="citation_author" content="Steshin, Simon" />
+    <meta name="citation_author_institution" content="Sage Future" />
+    <meta name="citation_author" content="Reznikov, Grigory" />
+    <meta name="citation_publication_date" content="2026/10/20" />
+    <meta name="citation_pdf_url" content="https://1000yearsofaisafety.com/1000-years-of-ai-safety.pdf" />
+    <!-- #root holds the main text, or a note's on its page, for readers that run no JavaScript (scripts/prerender.mjs).
+         Here it's hidden: React replaces it. -->
+    <script>
+      document.documentElement.classList.add('js')
+    </script>
+    <style>
+      .js .prerendered {
+        display: none;
+      }
+      .prerendered {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 24px 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- Visitor counts, no cookies: https://steshinss.goatcounter.com. It counts a page load at the canonical address;
+         Stack.tsx counts each note opened. -->
+    <script data-goatcounter="https://steshinss.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  </body>
+</html>

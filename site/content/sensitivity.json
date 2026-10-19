@@ -1,0 +1,977 @@
+{
+  "command": "python sensitivity.py --json site/content/sensitivity.json",
+  "preset": "eli-08-16-26",
+  "scenario": {
+    "model": "compartmentalized",
+    "row": "SAR",
+    "years": 9.0,
+    "staffing": {
+      "years": "own staff",
+      "hired": "unlimited hiring"
+    },
+    "t_pause": 2029.0906137221873
+  },
+  "units": {
+    "years": "AI safety years: the research stock the lab builds in the pause / RS_safety_2025",
+    "hired": "people to hire on top of the lab's own staff: the most at any time of the pause (FTE)"
+  },
+  "middle": {
+    "years": 24131.785330357445,
+    "hired": 130711.42165472175
+  },
+  "ours": [
+    {
+      "name": "m_C",
+      "unit": "x",
+      "value": 2.6,
+      "p10": 1.8,
+      "p90": 3.1,
+      "years": [
+        20358.30338968451,
+        26076.887548716168
+      ],
+      "hired": [
+        99146.20854247964,
+        148009.88699332904
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "m_L",
+      "unit": "x",
+      "value": 3.2,
+      "p10": 1.8,
+      "p90": 4.0,
+      "years": [
+        18997.53315978796,
+        25689.46496878143
+      ],
+      "hired": [
+        154060.68046323495,
+        117368.98804985707
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "s_ext",
+      "unit": "share",
+      "value": 0.38,
+      "p10": 0.1,
+      "p90": 0.45,
+      "years": [
+        24479.750818932607,
+        24040.589682721657
+      ],
+      "hired": [
+        130946.8110215117,
+        130652.4462715598
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "M",
+      "unit": "ratio",
+      "value": 1.2,
+      "p10": 1.01,
+      "p90": 1.25,
+      "years": [
+        24005.909387098713,
+        24158.832987864378
+      ],
+      "hired": [
+        129948.53100759763,
+        130875.36589126207
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "C_safety_2025",
+      "unit": "H100e",
+      "value": 27406.0,
+      "p10": 20000.0,
+      "p90": 35000.0,
+      "years": [
+        27219.869220375913,
+        21933.891888108174
+      ],
+      "hired": [
+        151532.4302051525,
+        116219.56879979194
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "L_safety_2025",
+      "unit": "FTE",
+      "value": 5012.0,
+      "p10": 1900.0,
+      "p90": 8000.0,
+      "years": [
+        28038.18165124251,
+        21907.100278192916
+      ],
+      "hired": [
+        108583.75889756318,
+        160292.5369498959
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "n_s",
+      "unit": "papers",
+      "value": 7260.0,
+      "p10": 7200.0,
+      "p90": 10000.0,
+      "years": [
+        24169.413888402618,
+        22429.4936410199
+      ],
+      "hired": [
+        129858.75301159464,
+        169649.95635752502
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "kappa_h",
+      "unit": "ratio",
+      "value": 0.02,
+      "p10": 0.007,
+      "p90": 0.1,
+      "years": [
+        26013.45950352253,
+        18171.103179577636
+      ],
+      "hired": [
+        80625.36197255747,
+        438933.32739111723
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "p_h",
+      "unit": "FTE-years",
+      "value": 0.00614022667,
+      "p10": 0.002,
+      "p90": 0.05,
+      "years": [
+        26120.05682701471,
+        16263.738332737357
+      ],
+      "hired": [
+        75057.56032113245,
+        720284.3937621831
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "m_h",
+      "unit": "count",
+      "value": 3.0,
+      "p10": 1.0,
+      "p90": 5.0,
+      "years": [
+        28410.583842811226,
+        21404.559867855245
+      ],
+      "hired": [
+        24315.56221401156,
+        237107.28109543197
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "zeta_p",
+      "unit": "exponent",
+      "value": 0.27,
+      "p10": 0.21,
+      "p90": 0.35,
+      "years": [
+        18416.78143972343,
+        28861.71246094014
+      ],
+      "hired": [
+        281839.514769831,
+        15861.438433640142
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "l_inf",
+      "unit": "ratio",
+      "value": 1.5,
+      "p10": 1.1,
+      "p90": 3.0,
+      "years": [
+        19972.90758742506,
+        28911.89270109603
+      ],
+      "hired": [
+        240250.31025420423,
+        11021.855842060308
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "sigma_c",
+      "unit": "ln units",
+      "value": 2.65,
+      "p10": 2.52,
+      "p90": 2.77,
+      "years": [
+        24006.54852943954,
+        24250.08217211247
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "moves": {
+        "years": true,
+        "hired": false
+      }
+    },
+    {
+      "name": "alpha",
+      "unit": "exponent",
+      "value": 1.45,
+      "p10": 1.35,
+      "p90": 1.8,
+      "years": [
+        24781.41184765298,
+        22694.06510925902
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "moves": {
+        "years": true,
+        "hired": false
+      }
+    },
+    {
+      "name": "kappa_c",
+      "unit": "ratio",
+      "value": 0.1,
+      "p10": 0.03,
+      "p90": 0.3,
+      "years": [
+        24620.132125524535,
+        22894.965538590503
+      ],
+      "hired": [
+        133672.57834741738,
+        123217.44051426105
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "kappa_p",
+      "unit": "ratio",
+      "value": 0.003,
+      "p10": 0.0005,
+      "p90": 0.025,
+      "years": [
+        24448.8526155398,
+        20453.19560990618
+      ],
+      "hired": [
+        127500.77680330098,
+        158965.0963472247
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "p_p",
+      "unit": "FTE-years",
+      "value": 0.00460517333,
+      "p10": 0.001,
+      "p90": 0.02,
+      "years": [
+        25484.368166904616,
+        16908.318167564878
+      ],
+      "hired": [
+        114557.57046220769,
+        199691.6665412352
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "w",
+      "unit": "share",
+      "value": 0.9,
+      "p10": 0.7,
+      "p90": 0.99,
+      "years": [
+        20708.323573570946,
+        25672.343120911362
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "moves": {
+        "years": true,
+        "hired": false
+      }
+    },
+    {
+      "name": "kappa_a",
+      "unit": "ratio",
+      "value": 0.08,
+      "p10": 0.02,
+      "p90": 0.3,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    }
+  ],
+  "fixed": [
+    "s_aut",
+    "RS_safety_2025",
+    "N_a"
+  ],
+  "aifm": [
+    {
+      "name": "ac_time_horizon_minutes",
+      "label": "AC Time Horizon Requirement",
+      "dist": "lognormal",
+      "value": 15000000.000000004,
+      "median": 15000000.0,
+      "p10": 12000.0,
+      "p90": 18750000000.0,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "t_pause": [
+        2029.0906137221873,
+        2029.0906137221873
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    },
+    {
+      "name": "ai_research_taste_at_coding_automation_anchor_sd",
+      "label": "Automated Research Taste at AC",
+      "dist": "normal",
+      "value": 0.5,
+      "median": 0.5,
+      "p10": -2.5,
+      "p90": 3.5,
+      "years": [
+        32887.38646387335,
+        20843.74109007455
+      ],
+      "hired": [
+        153739.55192290834,
+        116445.86573651087
+      ],
+      "t_pause": [
+        2030.2399239735896,
+        2028.051217303195
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "ai_research_taste_slope",
+      "label": "Automated Research Taste Slope",
+      "dist": "lognormal",
+      "value": 2.1,
+      "median": 2.3,
+      "p10": 0.7999999999999999,
+      "p90": 6.6125,
+      "years": [
+        34800.493861360395,
+        20964.50443814215
+      ],
+      "hired": [
+        155920.43038958483,
+        125121.76289492953
+      ],
+      "t_pause": [
+        2030.3422014043433,
+        2028.68020947277
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "automation_logistic_asymptote",
+      "label": "Coding Automation Fraction Logistic Asymptote",
+      "dist": "shifted_lognormal",
+      "value": 1.1,
+      "median": 1.1,
+      "p10": 1.005,
+      "p90": 3.0,
+      "years": [
+        60008.073930399056,
+        15499.483931079809
+      ],
+      "hired": [
+        555348.1759765439,
+        62873.174167121986
+      ],
+      "t_pause": [
+        2031.4979183386351,
+        2028.275706420473
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "coding_automation_efficiency_slope",
+      "label": "Coding Automation Efficiency Improvement Factor",
+      "dist": "lognormal",
+      "value": 3.0,
+      "median": 3.0,
+      "p10": 1.0,
+      "p90": 9.0,
+      "years": [
+        20824.006100009843,
+        25064.802582262582
+      ],
+      "hired": [
+        58773.97010927273,
+        213738.72994038984
+      ],
+      "t_pause": [
+        2029.288120618213,
+        2028.9043526913879
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "doubling_difficulty_growth_factor",
+      "label": "Doubling Difficulty Growth Factor",
+      "dist": "normal",
+      "value": 0.92,
+      "median": 0.9199999999999999,
+      "p10": 0.8199999999999998,
+      "p90": 1.02,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "t_pause": [
+        2029.0906137221873,
+        2029.0906137221873
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    },
+    {
+      "name": "excess_uplift_doubling_time",
+      "label": "Doubling Time of the Excess Coding Uplift",
+      "dist": "lognormal",
+      "value": 6.500769185258003,
+      "median": 6.500769185258003,
+      "p10": 2.0,
+      "p90": 21.13,
+      "years": [
+        12700.335458797994,
+        231873.15053899155
+      ],
+      "hired": [
+        59372.58822788597,
+        693676.6299321316
+      ],
+      "t_pause": [
+        2027.7471985631055,
+        2037.7289502991073
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "gap_years",
+      "label": "Size of Effective Compute Gap",
+      "dist": "lognormal",
+      "value": 0.7,
+      "median": 0.7000000000000001,
+      "p10": 0.1,
+      "p90": 4.9,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "t_pause": [
+        2029.0906137221873,
+        2029.0906137221873
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    },
+    {
+      "name": "inf_compute_asymptote",
+      "label": "Infinite Experiment Compute Asymptote",
+      "dist": "shifted_lognormal",
+      "value": 1001.0,
+      "median": 1001.0,
+      "p10": 26.0,
+      "p90": 40001.0,
+      "years": [
+        26409.80259936496,
+        19456.768536784748
+      ],
+      "hired": [
+        532532.3317597184,
+        45579.17899739707
+      ],
+      "t_pause": [
+        2028.979329311977,
+        2029.1666222984325
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "inf_labor_asymptote",
+      "label": "Infinite Coding Labor Asymptote",
+      "dist": "shifted_lognormal",
+      "value": 15.142135623730951,
+      "median": 15.142135623730951,
+      "p10": 2.0,
+      "p90": 201.00000000000003,
+      "years": [
+        10162.759135111826,
+        25474.221515754245
+      ],
+      "hired": [
+        0.0,
+        507171.4285654838
+      ],
+      "t_pause": [
+        2029.4603452097958,
+        2028.8985596811608
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "inv_compute_anchor_exp_cap",
+      "label": "Slowdown from 10x less Experiment Compute",
+      "dist": "shifted_lognormal",
+      "value": 2.794435844492636,
+      "median": 2.794435844492636,
+      "p10": 1.7,
+      "p90": 5.6,
+      "years": [
+        2035.7093039255649,
+        13062.027953350213
+      ],
+      "hired": [
+        0.0,
+        44775669.98030255
+      ],
+      "t_pause": [
+        2028.8941963652655,
+        2029.2616976194795
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "max_serial_coding_labor_multiplier",
+      "label": "Maximum Serial Coding Labor Multiplier",
+      "dist": "lognormal",
+      "value": 100000000.0,
+      "median": 100000000.0,
+      "p10": 10000.0,
+      "p90": 1000000000000.0,
+      "years": [
+        24132.745131109223,
+        24131.69377397754
+      ],
+      "hired": [
+        130721.818924169,
+        130711.17965728126
+      ],
+      "t_pause": [
+        2029.0906918988221,
+        2029.0906011407394
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "median_to_top_taste_multiplier",
+      "label": "Median-to-Top-Human Research Taste Multiplier",
+      "dist": "shifted_lognormal",
+      "value": 3.698147512646408,
+      "median": 4.0,
+      "p10": 1.8,
+      "p90": 12.25,
+      "years": [
+        13538.000808655284,
+        58368.08053339694
+      ],
+      "hired": [
+        133193.27384811296,
+        128559.79607164144
+      ],
+      "t_pause": [
+        2029.2190947982642,
+        2028.9634497114407
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "parallel_penalty",
+      "label": "Parallel Penalty",
+      "dist": "beta",
+      "value": 0.5,
+      "median": 0.5,
+      "p10": 0.2466364532884666,
+      "p90": 0.7533635467115334,
+      "years": [
+        9400.167615960203,
+        33385.980531571855
+      ],
+      "hired": [
+        0.0,
+        595981.9538649516
+      ],
+      "t_pause": [
+        2028.1814005023373,
+        2029.6750824523722
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "present_doubling_time",
+      "label": "Present Doubling Time",
+      "dist": "lognormal",
+      "value": 0.37488146126475763,
+      "median": 0.37488146126475763,
+      "p10": 0.18329999999999996,
+      "p90": 0.7667,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "t_pause": [
+        2029.0906137221873,
+        2029.0906137221873
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    },
+    {
+      "name": "present_revenue_growth_rate",
+      "label": "Present Revenue Growth Rate",
+      "dist": "lognormal",
+      "value": 5.0,
+      "median": 5.0,
+      "p10": 2.0,
+      "p90": 12.5,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "t_pause": [
+        2029.0906137221873,
+        2029.0906137221873
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    },
+    {
+      "name": "revenue_required_for_ac",
+      "label": "Revenue Required for AC",
+      "dist": "lognormal",
+      "value": 7000000000000.0,
+      "median": 7000000000000.0,
+      "p10": 200000000000.0,
+      "p90": 245000000000000.0,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "t_pause": [
+        2029.0906137221873,
+        2029.0906137221873
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    },
+    {
+      "name": "rho_coding_labor",
+      "label": "Coding Labor Substitutability",
+      "dist": "choice",
+      "value": -2.0,
+      "median": -2.0,
+      "p10": -5.0,
+      "p90": -1.0,
+      "years": [
+        20656.107652787367,
+        29012.507477063944
+      ],
+      "hired": [
+        98735.70956443949,
+        191820.8380831075
+      ],
+      "t_pause": [
+        2028.8056678257412,
+        2029.4554610582932
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "serial_uplift_at_reference_date",
+      "label": "Serial Coding Uplift at the Reference Date",
+      "dist": "shifted_lognormal",
+      "value": 1.7,
+      "median": 1.7000000000000002,
+      "p10": 1.1,
+      "p90": 5.9,
+      "years": [
+        43920.81151626992,
+        16542.75664669328
+      ],
+      "hired": [
+        186343.36529820564,
+        98543.0571689223
+      ],
+      "t_pause": [
+        2031.1072043144172,
+        2028.1550733041518
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "software_progress_rate_at_reference_year",
+      "label": "Software Efficiency OOMs/year in 2024",
+      "dist": "lognormal",
+      "value": 1.0,
+      "median": 1.0,
+      "p10": 0.4,
+      "p90": 2.5,
+      "years": [
+        27159.199586531373,
+        22113.633040379525
+      ],
+      "hired": [
+        138571.56394292097,
+        126831.68202714698
+      ],
+      "t_pause": [
+        2029.4847826321254,
+        2028.8300216349764
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "taste_limit",
+      "label": "Maximum Research Taste",
+      "dist": "lognormal",
+      "value": 8.0,
+      "median": 8.0,
+      "p10": 2.0,
+      "p90": 32.0,
+      "years": [
+        23988.595784952257,
+        24175.022339661467
+      ],
+      "hired": [
+        130444.94949133716,
+        130794.00620637482
+      ],
+      "t_pause": [
+        2029.0767506770615,
+        2029.0949073711283
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "taste_limit_smoothing",
+      "label": "Research Taste Slowdown Factor Halfway to Algorithmic Limit",
+      "dist": "beta",
+      "value": 0.5,
+      "median": 0.5,
+      "p10": 0.19640850544777355,
+      "p90": 0.8035914945522266,
+      "years": [
+        24062.151899556076,
+        24177.288919521732
+      ],
+      "hired": [
+        130478.23887755763,
+        130804.03270606253
+      ],
+      "t_pause": [
+        2029.0784832820834,
+        2029.095428569792
+      ],
+      "moves": {
+        "years": true,
+        "hired": true
+      }
+    },
+    {
+      "name": "ted_ai_m2b",
+      "label": "Median-to-top-human jumps above SAR needed to reach TED-AI",
+      "dist": "lognormal",
+      "value": 1.4966629547095764,
+      "median": 1.4966629547095764,
+      "p10": 0.39999999999999997,
+      "p90": 5.6,
+      "years": [
+        24131.785330357445,
+        24131.785330357445
+      ],
+      "hired": [
+        130711.42165472175,
+        130711.42165472175
+      ],
+      "t_pause": [
+        2029.0906137221873,
+        2029.0906137221873
+      ],
+      "moves": {
+        "years": false,
+        "hired": false
+      }
+    }
+  ],
+  "kept": [
+    {
+      "name": "ac_anchor_mode",
+      "value": "uplift-solved"
+    },
+    {
+      "name": "include_gap",
+      "value": "no gap"
+    }
+  ]
+}

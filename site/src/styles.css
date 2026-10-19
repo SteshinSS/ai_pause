@@ -1,0 +1,3729 @@
+/* Layout modes are set by Stack.tsx on .stack[data-mode]: desktop columns or phone sheets. */
+
+:root {
+  color-scheme: light dark;
+  /* Neutral drawing paper and India ink, as in the ink plates; the rust accent is the one colour. */
+  --bg: #f7f7f5;
+  --raised: #fcfcfb;
+  --ink: #161616;
+  --muted: #6b6b68;
+  --rule: #d6d6d2;
+  --accent: #b03f1c;
+  /* Symbols of our own inputs (pause_inputs.csv) in the formulas: a deeper red than the accent. */
+  --ours: #8e1b22;
+  --shadow: rgb(0 0 0 / 0.2);
+  /* The paper texture: how much ink its clouds and its tooth take. */
+  --paper-clouds: 0.07;
+  --paper-tooth: 0.05;
+  /* The veil under the text (.pane-body): a slightly paler band that lifts it off the paper, plates and backdrops. */
+  --veil: rgb(255 255 255 / 0.35);
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --note-bg: color-mix(in srgb, var(--accent) 11%, transparent);
+  --note-bg-strong: color-mix(in srgb, var(--accent) 22%, transparent);
+  /* Plates (Plate.tsx) in full ink on paper. In dark mode a drawing inverts to large pale masses, so it is dimmed
+     there to keep the text the brightest thing on the page. */
+  --plate-ink: var(--ink);
+  --serif: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --dur: 380ms;
+  --ease: cubic-bezier(0.22, 0.72, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131313;
+    --raised: #1f1f1e;
+    --ink: #e4e4e1;
+    --muted: #979792;
+    --rule: #2d2d2b;
+    --accent: #ec8a5e;
+    --ours: #ee6f78;
+    --shadow: rgb(0 0 0 / 0.6);
+    --paper-clouds: 0.04;
+    --paper-tooth: 0.03;
+    --veil: rgb(0 0 0 / 0.15);
+    --note-bg: color-mix(in srgb, var(--accent) 17%, transparent);
+    --note-bg-strong: color-mix(in srgb, var(--accent) 30%, transparent);
+    --plate-ink: color-mix(in srgb, var(--ink) 72%, var(--bg));
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pane-scroll:focus,
+.pane-scroll:focus-visible {
+  outline: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- desktop: columns side by side ---------- */
+
+.stack[data-mode='desktop'] {
+  position: fixed;
+  inset: 0;
+  overflow: auto hidden;
+  overscroll-behavior-x: contain;
+}
+
+.stack[data-mode='desktop'][data-fits] {
+  overflow-x: hidden;
+}
+
+.stack[data-mode='desktop'] .track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  height: 100%;
+}
+
+/* The number of columns, which changes whenever a note opens or closes, is the pane's own (see --shift). */
+@property --n {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
+.stack[data-mode='desktop'] .pane {
+  --pl: 0px;
+  --pr: 0px;
+  position: sticky;
+  /* Folded panes pile up as spines: on the left when scrolled right, on the right when scrolled left. */
+  left: calc(var(--i) * var(--spine-w));
+  right: calc((var(--n) - var(--i)) * var(--spine-w) - var(--pane-w));
+  flex: none;
+  width: calc(var(--pane-w) + var(--pl) + var(--pr));
+  height: 100%;
+  background: var(--bg);
+  transition:
+    width var(--shift) var(--ease),
+    left var(--shift) var(--ease),
+    right var(--shift) var(--ease),
+    opacity var(--shift) linear;
+  /* A layer of its own: as the columns move, its text moves as a whole, rather than every element of a long note
+     being placed and painted again each frame. */
+  will-change: transform;
+}
+
+/* Spare width belongs to the outer panes, so the text sits centred and the wheel works anywhere. */
+.stack[data-mode='desktop'] .pane:first-child {
+  --pl: var(--extra);
+}
+
+.stack[data-mode='desktop'] .pane[data-last] {
+  --pr: var(--extra);
+}
+
+.stack[data-mode='desktop'] .pane + .pane {
+  box-shadow: -1px 0 0 var(--rule);
+}
+
+.stack[data-mode='desktop']:not([data-fits]) .pane + .pane {
+  box-shadow:
+    -1px 0 0 var(--rule),
+    -14px 0 28px -18px var(--shadow);
+}
+
+.stack[data-mode='desktop'] .pane-scroll {
+  height: 100%;
+  overflow: hidden auto;
+  padding-inline: var(--pl) var(--pr);
+  transition:
+    padding var(--shift) var(--ease),
+    opacity 200ms,
+    visibility 0s;
+}
+
+.stack[data-mode='desktop'] .pane[data-collapsed] .pane-scroll {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    padding var(--shift) var(--ease),
+    opacity 200ms,
+    visibility 0s 200ms;
+}
+
+.pane-spine {
+  display: none;
+}
+
+.stack[data-mode='desktop'] .pane-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--spine-w);
+  margin: 0;
+  padding: 28px 0 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms,
+    color 150ms;
+}
+
+.stack[data-mode='desktop'] .pane[data-collapsed] .pane-spine {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* While the columns change width (Stack.tsx), the text in each keeps the width it will have: its scrolling sheet is
+   as wide as the column will be (--pane-w and the side margins, Pane.tsx), centred in the column on screen, which clips
+   it. So the text reflows at most once, not line by line, and, the sheet being a layer of its own, moves as a whole
+   rather than being laid out and painted again every frame. */
+.stack[data-mode='desktop'] .pane {
+  display: flex;
+  justify-content: center;
+  overflow: clip;
+}
+
+.stack[data-mode='desktop'] .pane-scroll {
+  flex: none;
+  box-sizing: content-box;
+  width: var(--pane-w);
+  will-change: transform;
+}
+
+/* A note closed keeps its place and look while its column narrows to nothing and the columns that stay move into
+   place: at the right edge it slides out of the screen, between columns it is squeezed out. It fades. Its sheet stays
+   at the column's left edge, as does that of one opened again on the way out, which widens back. */
+.stack[data-mode='desktop'] .pane[data-leaving] {
+  width: 0;
+  opacity: 0;
+}
+
+.stack[data-mode='desktop'] .pane:is([data-leaving], [data-returning]) {
+  justify-content: flex-start;
+}
+
+/* In a column wider than PANE_W (a note and its companion side by side, Stack.tsx) the text keeps a column's width. */
+.stack[data-mode='desktop'] .pane-scroll {
+  container-type: inline-size;
+}
+
+.stack[data-mode='desktop'] .pane-body {
+  --pad-x: max(48px, (100cqi - 624px) / 2);
+}
+
+.pane-spine:hover {
+  color: var(--accent);
+}
+
+.pane-spine span {
+  max-height: 100%;
+  writing-mode: vertical-rl;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pane-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.pane-back,
+.pane-close {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 150ms,
+    background-color 150ms;
+}
+
+.pane-back:hover,
+.pane-close:hover {
+  color: var(--accent);
+}
+
+.stack[data-mode='desktop'] .pane-bar {
+  height: 0;
+}
+
+.stack[data-mode='desktop'] .pane-back {
+  display: none;
+}
+
+.stack[data-mode='desktop'] .pane-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.pane-close-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.stack[data-mode='desktop'] .pane-close:hover {
+  background: var(--accent-soft);
+}
+
+/* ---------- plates: drawings in the side margins (Plate.tsx) ---------- */
+
+/* <Plate> is a zero-height anchor in the text, so the text flows on as if it weren't there; the drawing hangs from
+   it and scrolls with the text. Only in a column Pane.tsx marks data-plates: a desktop, with a wide enough margin. */
+.plate {
+  display: none;
+}
+
+.pane[data-plates] .plate {
+  /* --own: the column's side margin when it opened as the last one. --lead: from the screen edge to the text. */
+  --own: max(0px, (var(--width) - (var(--i) + 1) * var(--pane-w)) / 2);
+  --lead: calc(var(--own) + var(--pad-x));
+  display: block;
+  position: relative;
+  height: 0;
+}
+
+/* The drawing's size comes from its column's side margin when that column opened as the last one (--own). When
+   later columns squeeze the margin, the drawing keeps its size and moves with the text, sliding off the screen
+   edge (or under the next column). It starts at the screen edge, and its drawn part, the two thirds away from the
+   text, reaches --reach under the text; its blank third lies under the text too. Clicks go through. */
+.plate-art {
+  --reach: 48px;
+  --fade: min(160px, var(--lead) / 2);
+  position: absolute;
+  top: 0;
+  z-index: -1;
+  width: calc((var(--lead) + var(--reach)) * 1.5 * var(--scale, 1));
+  aspect-ratio: 2 / 3;
+  background: var(--plate-ink);
+  -webkit-mask-image: var(--mask);
+  mask-image: var(--mask);
+  /* Drawings are 2:3 like the box, so this is "contain" for the drawing; the gradient layers (Plate.tsx) need an
+     explicit size too, or Chrome draws a faint line down the box's far edge. */
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  /* While it fades in, Chrome composites the drawing as a layer, and at a fractional y the box's top edge shows as a
+     thin line across the margin. The top of every drawing is blank paper, so clip it. */
+  clip-path: inset(2px 0 0);
+  pointer-events: none;
+}
+
+/* A drawing's dark-mode negative, src/art/<id>-dark (Plate.tsx), or the drawing itself when it has none. */
+@media (prefers-color-scheme: dark) {
+  .plate-art {
+    -webkit-mask-image: var(--mask-dark);
+    mask-image: var(--mask-dark);
+  }
+}
+
+.plate-left .plate-art {
+  left: calc(-1 * var(--lead));
+  -webkit-mask-position: left top;
+  mask-position: left top;
+}
+
+.plate-right .plate-art {
+  right: calc(-1 * var(--lead));
+  -webkit-mask-position: right top;
+  mask-position: right top;
+}
+
+/* <Plate flip>: a drawing made for the other side, mirrored in place. */
+.plate-flip .plate-art {
+  scale: -1 1;
+}
+
+/* <Mark>: a small drawing at the screen edge (Mark.tsx), level with the paragraph after it, --out of its width
+   beyond the edge and half transparent, so it reads as a stray detail rather than a pointer to the text. Like a
+   plate, it moves with the text when later columns squeeze the margin. */
+.mark-art {
+  position: absolute;
+  top: 0;
+  z-index: -1;
+  width: var(--size);
+  aspect-ratio: 1;
+  background: var(--plate-ink);
+  opacity: 0.5;
+  -webkit-mask: center / contain no-repeat;
+  mask: center / contain no-repeat;
+  pointer-events: none;
+}
+
+.mark-left .mark-art {
+  left: calc(-1 * var(--lead) - var(--out) * var(--size));
+}
+
+.mark-right .mark-art {
+  right: calc(-1 * var(--lead) - var(--out) * var(--size));
+}
+
+/* <Backdrop>: a drawing under a section's text (Backdrop.tsx), a zero-height anchor like a plate, but across the
+   column's whole sheet, side margins included, and on the phone too. --backdrop is its opacity: faint enough that
+   formulas read over it. Dark mode draws it as pale masses on dark, dimmed further by --plate-ink. */
+.backdrop {
+  --backdrop: 0.1;
+  position: relative;
+  height: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .backdrop {
+    --backdrop: 0.16;
+  }
+}
+
+.backdrop-art {
+  position: absolute;
+  top: 0;
+  left: calc(-1 * var(--pad-x) - var(--pl, 0px));
+  right: calc(-1 * var(--pad-x) - var(--pr, 0px));
+  z-index: -1;
+  aspect-ratio: 2 / 3;
+  background: var(--plate-ink);
+  opacity: var(--backdrop);
+  -webkit-mask-image: var(--mask);
+  mask-image: var(--mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  pointer-events: none;
+}
+
+/* Its dark-mode version, src/art/<id>-dark (Backdrop.tsx), or the drawing itself when it has none. */
+@media (prefers-color-scheme: dark) {
+  .backdrop-art {
+    -webkit-mask-image: var(--mask-dark);
+    mask-image: var(--mask-dark);
+  }
+}
+
+/* `top`: the anchor drops out of the layout, so the drawing hangs from the top of .pane-body, above the title. */
+.backdrop[data-top] {
+  position: static;
+}
+
+.backdrop[data-top] .backdrop-art {
+  left: calc(-1 * var(--pl, 0px));
+  right: calc(-1 * var(--pr, 0px));
+}
+
+/* Coffee stains in the big spaces that line a note up with its companion (sync.ts, which sets their size, place and
+   turn). A mask in the ink colour, like a plate, so the coffee turns grey and dark mode inverts it; faint (--stain).
+   Over the veil: the space has no text, and a stain across the veil's edge would show it. On ::after, since ::before
+   is the heading's number (numbering.ts). */
+.pane-body > [data-stain] {
+  --stain: 0.08;
+  position: relative;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pane-body > [data-stain] {
+    --stain: 0.1;
+  }
+}
+
+.pane-body > [data-stain]::after {
+  content: '';
+  position: absolute;
+  top: var(--stain-top);
+  left: calc(-1 * var(--pad-x) + var(--stain-x) * (100% + 2 * var(--pad-x) - var(--stain-size)));
+  width: var(--stain-size);
+  aspect-ratio: 1;
+  background: var(--plate-ink);
+  opacity: var(--stain);
+  -webkit-mask: var(--stain-art) center / contain no-repeat;
+  mask: var(--stain-art) center / contain no-repeat;
+  transform: rotate(var(--stain-turn));
+  pointer-events: none;
+}
+
+.pane-body > [data-stain='0'] {
+  --stain-art: url('./art/coffee-ring.webp');
+}
+
+.pane-body > [data-stain='1'] {
+  --stain-art: url('./art/coffee-blot.webp');
+}
+
+.pane-body > [data-stain='2'] {
+  --stain-art: url('./art/coffee-rings.webp');
+}
+
+/* <Doodle>: a drawing in the space above the heading after it (Doodle.tsx), which sync.ts measures (--space, and
+   data-space while there is one, the only time it shows). The image keeps its own shape across the box's width, in the
+   middle of a square box. Over the veil, like the stains. */
+.doodle {
+  --doodle: 0.05;
+  position: relative;
+  height: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .doodle {
+    --doodle: 0.07;
+  }
+}
+
+.doodle-art {
+  --sheet: calc(100% + 2 * var(--pad-x));
+  /* Where it enters the sheet from the left and leaves it on the right, as shares of its width: the fades start there,
+     so a drawing that the sheet's edge cuts has faded out by then. */
+  --in: max(0, (var(--w) / 2 - var(--x)) / var(--w));
+  --out: min(1, (1 - var(--x) + var(--w) / 2) / var(--w));
+  --fade: linear-gradient(
+    to right,
+    transparent calc(100% * var(--in)),
+    #000 40%,
+    #000 60%,
+    transparent calc(100% * var(--out))
+  );
+  position: absolute;
+  top: calc(var(--y) * var(--space, 0px));
+  left: calc(-1 * var(--pad-x) + var(--x) * var(--sheet));
+  width: calc(var(--w) * var(--sheet));
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  rotate: var(--turn, 0deg);
+  background: var(--plate-ink);
+  opacity: var(--doodle);
+  -webkit-mask:
+    var(--mask) center / 100% auto no-repeat,
+    var(--fade);
+  mask:
+    var(--mask) center / 100% auto no-repeat,
+    var(--fade);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  pointer-events: none;
+}
+
+.doodle:not([data-space]) {
+  display: none;
+}
+
+/* <Night>: the end of a note on black (Night.tsx). Its drawing crosses the column's whole sheet, side margins included,
+   at 3:1 (taller and cut at the sides on a narrow screen), and its black foot runs on as the background of the text
+   after it, down to the note's end: the note's bottom padding moves inside. */
+.pane-body:has(> .night) {
+  padding-bottom: 0;
+}
+
+.night {
+  /* From the text's edges out to the sheet's, and the sheet's width: on desktop the column and its side margins, on
+     the phone the screen, where the text is at most 42rem wide, centred. */
+  --out-l: calc(var(--pad-x) + var(--pl, 0px));
+  --out-r: calc(var(--pad-x) + var(--pr, 0px));
+  --sheet: calc(var(--pane-w) + var(--pl, 0px) + var(--pr, 0px));
+  margin: 3em calc(-1 * var(--out-r)) 0 calc(-1 * var(--out-l));
+}
+
+.stack[data-mode='mobile'] .night {
+  --out-l: calc((100vw - min(100vw, 42rem)) / 2 + var(--pad-x));
+  --out-r: var(--out-l);
+  --sheet: 100vw;
+}
+
+.night-art {
+  /* The height, not aspect-ratio: with a min-height, aspect-ratio would widen the box instead of cutting it. */
+  height: max(220px, var(--sheet) / 3);
+  /* The text's black overlaps its foot, so no seam shows where they meet at a fractional pixel. */
+  margin-bottom: -2px;
+  background: var(--plate-ink);
+  -webkit-mask: var(--mask) center / cover no-repeat;
+  mask: var(--mask) center / cover no-repeat;
+  pointer-events: none;
+}
+
+/* Flow-root, so the first heading's margin stays inside, on black. */
+.night-body {
+  display: flow-root;
+  padding: 0 var(--out-r) 120px var(--out-l);
+}
+
+.stack[data-mode='mobile'] .night-body {
+  padding-bottom: 88px;
+}
+
+/* On paper the black is the ink (--plate-ink keeps :root's value), and the text on it takes the dark palette, :root's
+   dark-mode values repeated. In dark mode the page is already dark: the drawing is its -dark version, whose foot is
+   the page, and the text is as everywhere else. */
+@media (prefers-color-scheme: light) {
+  .night-body {
+    --bg: #131313;
+    --raised: #1f1f1e;
+    --ink: #e4e4e1;
+    --muted: #979792;
+    --rule: #2d2d2b;
+    --accent: #ec8a5e;
+    --ours: #ee6f78;
+    --shadow: rgb(0 0 0 / 0.6);
+    background: var(--plate-ink);
+    color: var(--ink);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .night-art {
+    -webkit-mask-image: var(--mask-dark);
+    mask-image: var(--mask-dark);
+  }
+}
+
+/* ---------- phone: notes are full-screen sheets over the page ---------- */
+
+.stack[data-mode='mobile'] .pane:not(:first-child) {
+  position: fixed;
+  inset: 0;
+  z-index: calc(10 + var(--i));
+  background: var(--bg);
+  box-shadow: -16px 0 32px -20px var(--shadow);
+}
+
+.stack[data-mode='mobile'] .pane:not(:first-child) .pane-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* A sheet closed slides back out to the right (Stack.tsx). */
+.stack[data-mode='mobile'] .pane[data-leaving] {
+  transform: translateX(100%);
+  transition: transform var(--shift) var(--ease);
+}
+
+/* Always a little taller than the sheet, so a swipe never scrolls the page underneath. */
+.stack[data-mode='mobile'] .pane:not(:first-child) .pane-body {
+  min-height: calc(100% - 48px + 1px);
+}
+
+.stack[data-mode='mobile'] .pane-bar {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.stack[data-mode='mobile'] .pane-close {
+  display: none;
+}
+
+.stack[data-mode='mobile'] .pane-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+.pane-back-arrow {
+  font-size: 28px;
+  line-height: 1;
+  margin-top: -3px;
+}
+
+.pane-back-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The note's companion (Pane.tsx), at the other end of the bar: it opens as the next sheet, as the back button
+   returns to the one before. On desktop the companion opens beside the note instead. */
+.pane-companion {
+  display: none;
+}
+
+.stack[data-mode='mobile'] .pane-companion {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-left: auto;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.pane-companion:hover {
+  color: var(--accent);
+}
+
+.pane-companion-label {
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pane-companion-arrow {
+  font-size: 28px;
+  line-height: 1;
+  margin-top: -3px;
+  color: var(--accent);
+}
+
+/* The switch at the top of a companion (Pane.tsx): off, it and its note scroll on their own (Stack.tsx). On desktop
+   it sits left of the close button; on a phone, at the far end of the bar. */
+.pane-together {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 150ms,
+    background-color 150ms;
+}
+
+.pane-together:hover {
+  color: var(--accent);
+}
+
+/* On desktop there is no bar behind it: its own frosted pill keeps it legible over the text scrolling under it. */
+.stack[data-mode='desktop'] .pane-together {
+  position: absolute;
+  top: 14px;
+  right: 66px;
+  padding: 0 14px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.stack[data-mode='desktop'] .pane-together:hover {
+  background: color-mix(in srgb, var(--accent) 12%, color-mix(in srgb, var(--bg) 88%, transparent));
+}
+
+.stack[data-mode='mobile'] .pane-together {
+  margin-left: auto;
+}
+
+.pane-together-label {
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pane-together-track {
+  position: relative;
+  width: 26px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 7px;
+  transition:
+    background-color 150ms,
+    border-color 150ms;
+}
+
+.pane-together-track::after {
+  content: '';
+  position: absolute;
+  top: 1.5px;
+  left: 1.5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  transition:
+    transform 150ms var(--ease),
+    background-color 150ms;
+}
+
+.pane-together[aria-checked='true'] .pane-together-track {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.pane-together[aria-checked='true'] .pane-together-track::after {
+  background: var(--bg);
+  transform: translateX(12px);
+}
+
+/* ---------- text ---------- */
+
+/* The paper texture, under the plates (z-index -1) and the text. It lies in the scrolled content, so it moves with the
+   text like a sheet, and spans the column's full width, side margins included. Painted in the ink colour, so dark
+   mode gets pale mottling on dark. Never the browser's scroll anchor: coming first and covering the whole note, it would
+   be the one picked, and as its top never moves, the text on screen would jump whenever something above it changed
+   height. */
+.pane-body {
+  position: relative;
+  min-height: 100%;
+}
+
+.pane-body::before,
+.pane-body::after {
+  content: '';
+  position: absolute;
+  inset: 0 calc(-1 * var(--pr, 0px)) 0 calc(-1 * var(--pl, 0px));
+  z-index: -2;
+  background: var(--ink);
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  pointer-events: none;
+  overflow-anchor: none;
+}
+
+.pane-body::before {
+  opacity: var(--paper-clouds);
+  -webkit-mask-image: url('./paper-clouds.webp');
+  mask-image: url('./paper-clouds.webp');
+  -webkit-mask-size: 1024px 1024px;
+  mask-size: 1024px 1024px;
+}
+
+.pane-body::after {
+  opacity: var(--paper-tooth);
+  -webkit-mask-image: url('./paper-tooth.webp');
+  mask-image: url('./paper-tooth.webp');
+  -webkit-mask-size: 512px 512px;
+  mask-size: 512px 512px;
+}
+
+/* --tail: space below the text that lines a note up with its companion (sync.ts); the body's own (see --shift). */
+@property --tail {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.pane-body {
+  --pad-x: 48px;
+  padding: 72px var(--pad-x) calc(120px + var(--tail, 0px));
+  font-size: 19px;
+  line-height: 1.58;
+}
+
+/* The veil: the text's width plus --veil-pad on each side, fading out over --veil-fade at its edges. It is the
+   body's own background, so it paints over the paper and the drawings (negative z-index) and under the text. */
+.pane-body {
+  --veil-pad: min(36px, var(--pad-x));
+  --veil-fade: 20px;
+  background: linear-gradient(
+      to right,
+      transparent,
+      var(--veil) var(--veil-fade),
+      var(--veil) calc(100% - var(--veil-fade)),
+      transparent
+    )
+    center / calc(100% - 2 * var(--pad-x) + 2 * var(--veil-pad)) 100% no-repeat;
+}
+
+/* Columns stepped back into shade keep it. */
+.stack[data-mode='desktop'] .pane[data-behind] .pane-body {
+  background: none;
+}
+
+.stack[data-mode='mobile'] .pane-body {
+  --pad-x: 22px;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 36px var(--pad-x) 88px;
+  font-size: 18px;
+}
+
+/* The short accent rule under it is a background: its ::before is the section number and its ::after a coffee stain. */
+.pane-body h1 {
+  margin: 0 0 1.4em;
+  padding-bottom: calc(0.55em + 2px);
+  background: linear-gradient(var(--accent), var(--accent)) left bottom / 48px 2px no-repeat;
+  font-size: 2.1em;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* A heading inside the text starts a new part. */
+.pane-body * + h1 {
+  margin-top: 2.4em;
+}
+
+.pane-body h2 {
+  margin: 2em 0 0.6em;
+  font-size: 1.45em;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.pane-body h3 {
+  margin: 1.8em 0 0.5em;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* A heading is a link to its section (Heading.tsx) that keeps the heading's look: on hover a # hangs in the margin
+   before it (before its number too: absolute, at the height of its first line), and after a click that copied it,
+   a label says so. */
+.pane-body :is(h1, h2, h3, h4, h5, h6)[data-section] {
+  position: relative;
+}
+
+.pane-body .heading-link,
+.pane-body .heading-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pane-body .heading-link::before {
+  content: '#';
+  content: '#' / ''; /* not part of the link's name for screen readers */
+  position: absolute;
+  right: 100%;
+  padding-right: 0.3em;
+  font-weight: 400;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 160ms;
+}
+
+.pane-body .heading-link:is(:hover, :focus-visible)::before {
+  opacity: 0.7;
+}
+
+.pane-body .heading-link[data-copied]::after {
+  content: 'Link copied';
+  margin-left: 0.8em;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+/* Section numbers of notes with `numbered: true` (numbering.ts), in the accent colour like the contents' numbers. */
+.pane-body [data-num]::before {
+  content: attr(data-num);
+  margin-right: 0.6em;
+  font-family: var(--mono);
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+.pane-body p,
+.pane-body ul,
+.pane-body ol {
+  margin: 0 0 1em;
+  text-wrap: pretty;
+}
+
+.pane-body ul,
+.pane-body ol {
+  padding-left: 1.2em;
+}
+
+/* A note's contents, set like the result table: a mono label over numbered rows split by rules; the list after the
+   numbered one (extras such as "How to improve the model") follows unnumbered and quieter. */
+.pane-body .toc {
+  --toc-num: 22px;
+  --toc-gap: 18px;
+  margin: 2.2em 0 2.6em;
+  counter-reset: toc;
+}
+
+.pane-body .toc > p:first-child {
+  margin: 0;
+  padding-bottom: 0.8em;
+  border-bottom: 1px solid var(--muted);
+  font: 500 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pane-body .toc :is(ol, ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pane-body .toc li {
+  margin: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.pane-body .toc ol > li:last-child {
+  border-bottom-color: var(--muted);
+}
+
+.pane-body .toc a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--toc-gap);
+  padding: 0.55em 0;
+  color: inherit;
+  text-decoration: none;
+  transition: color 160ms;
+}
+
+.pane-body .toc ol a::before {
+  counter-increment: toc;
+  content: counter(toc, decimal-leading-zero);
+  flex: none;
+  width: var(--toc-num);
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.pane-body .toc ul a {
+  padding-left: calc(var(--toc-num) + var(--toc-gap));
+  font-size: 0.89em;
+  color: var(--muted);
+}
+
+.pane-body .toc ul li:last-child {
+  border-bottom: none;
+}
+
+.pane-body .toc a::after {
+  content: '→';
+  margin-left: auto;
+  font-size: 0.85em;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 160ms,
+    transform 160ms var(--ease);
+}
+
+.pane-body .toc a:hover {
+  color: var(--accent);
+}
+
+.pane-body .toc a:hover::after {
+  opacity: 1;
+  transform: none;
+}
+
+/* Code blocks quote text verbatim (a model's prompt): wrapped, since the column is narrower than its lines. */
+.pane-body pre {
+  margin: 0 0 1.2em;
+  padding: 0.9em 1em;
+  background: var(--raised);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--accent);
+  font-family: var(--mono);
+  font-size: 0.66em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.pane-body code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+}
+
+.pane-body pre code {
+  font-size: inherit;
+}
+
+/* KaTeX's default 1.21em is sized for Computer Modern text; next to Newsreader its capitals look too big.
+   Popups sit in <body>, not in a pane (Gloss.tsx), so rules for what they can hold name them too. */
+:is(.pane-body, .gloss-pop) .katex {
+  font-size: 1.1em;
+}
+
+/* Inline maths with the punctuation next to it (math.ts): Chrome would break the line on either side of the maths. */
+.math-end {
+  white-space: nowrap;
+}
+
+/* A display formula wider than the column scrolls on its own; the padding keeps tall glyphs from being clipped. */
+:is(.pane-body, .gloss-pop) .katex-display {
+  margin: 0.9em 0;
+  padding: 0.5em 0;
+  overflow: auto hidden;
+}
+
+/* A formula's number (\tag{n}) in a row after it, not KaTeX's absolute right: 0, which overlaps a formula as wide as
+   the column. An empty box as wide as the number on the left keeps the formula centred; it gives way first. A number
+   with a letter, a derivation step's (26a), is a little wider and gets its own width. */
+:is(.pane-body, .gloss-pop) .katex-display > .katex > .katex-html:has(> .tag) {
+  display: flex;
+  align-items: baseline;
+}
+
+:is(.pane-body, .gloss-pop) .katex-display > .katex > .katex-html:has(> .tag)::before {
+  content: '';
+  flex: 0 1 2.5em;
+  min-width: 0;
+}
+
+:is(.pane-body, .gloss-pop) .katex-display > .katex > .katex-html:has(> .tag) > .base:first-child {
+  margin-left: auto;
+}
+
+:is(.pane-body, .gloss-pop) .katex-display > .katex > .katex-html > .tag {
+  position: static;
+  flex: none;
+  min-width: 2.5em;
+  margin-left: auto;
+  text-align: right;
+}
+
+/* Numbers on several rows stack in a KaTeX vlist, whose -2px margin would push 2px past the column and scroll it. */
+:is(.pane-body, .gloss-pop) .katex-display > .katex > .katex-html > .tag > .vlist-t2 {
+  margin-right: 0;
+}
+
+/* A formula our model doesn't use (Unused.tsx), AIFM's or the logic behind one of ours: grey, like a side remark,
+   under a small label with a popup, set like the label in the symbol popups. */
+.pane-body .unused {
+  color: var(--muted);
+}
+
+.pane-body .unused-label {
+  margin-top: 0.9em;
+  text-align: center;
+}
+
+.pane-body .unused-label .gloss-term {
+  font: 500 10.5px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+}
+
+.pane-body .unused .katex-display {
+  margin-top: 0;
+}
+
+/* The steps behind a formula (Derivation.tsx): closed, a small label under it, set like the label of Unused.tsx. */
+.pane-body .derivation {
+  margin: 0.4em 0 1em;
+}
+
+.pane-body .derivation > summary {
+  width: fit-content;
+  margin: 0 auto;
+  font: 500 10.5px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.pane-body .derivation > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pane-body .derivation > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.5em;
+  transition: transform 0.15s;
+}
+
+.pane-body .derivation[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+/* Open, a rule closes the steps, so the text after them reads as the note again. */
+.pane-body .derivation[open] {
+  padding-bottom: 0.2em;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 1.4em;
+}
+
+.pane-body .derivation[open] > summary {
+  margin-bottom: 0.6em;
+}
+
+.pane-body .derivation > summary:hover {
+  color: inherit;
+}
+
+/* A diagram (Flow.tsx): boxes in two columns, a box with .flow-wide across both, arrows drawn over them. The side
+   padding holds the arrows that go around boxes. */
+.pane-body .flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6em 0.8em;
+  margin: 1.4em 0 2em;
+  padding: 0 1em;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.pane-body .flow > [data-node] {
+  padding: 0.4em 0.4em 0.5em;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--raised);
+  text-align: center;
+}
+
+.pane-body .flow > .flow-wide,
+.pane-body .flow > figcaption {
+  grid-column: 1 / -1;
+}
+
+/* A formula in a box stays on one line: half a phone's width still holds the widest. */
+.pane-body .flow .katex {
+  white-space: nowrap;
+}
+
+/* The box of what the diagram leads to. */
+.pane-body .flow > .flow-out {
+  border-color: var(--accent);
+}
+
+.pane-body .flow-label {
+  display: block;
+  margin-bottom: 0.25em;
+  font: 500 10.5px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pane-body .flow > figcaption {
+  color: var(--muted);
+  text-align: center;
+}
+
+.pane-body .flow-frame {
+  container-type: inline-size;
+}
+
+/* A ledger (<Flow ledger>): a paper card in the middle column, each of its rows summed into the side boxes of the same
+   row. The card's rows sit on the diagram's own rows (subgrid), so they line up with the side boxes. Rows are close,
+   so the wide box keeps a margin for the arrows into and out of it. */
+.pane-body .flow.flow-ledger {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.6em 1.4em;
+}
+
+.pane-body .flow-ledger > .flow-left {
+  grid-column: 1;
+}
+
+.pane-body .flow-ledger > .flow-right {
+  grid-column: 3;
+}
+
+.pane-body .flow-ledger > .flow-wide {
+  margin: 1em 0;
+}
+
+.pane-body .flow-ledger > figcaption {
+  margin-top: 0.8em;
+}
+
+/* A side box or a card row holds a label over a formula, centered in its row. */
+.pane-body .flow-ledger > [data-node]:not(.flow-wide, .flow-card),
+.pane-body .flow-card > * {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pane-body .flow-ledger > .flow-head {
+  align-self: end;
+  text-align: center;
+}
+
+.pane-body .flow-ledger > .flow-card {
+  grid-column: 2;
+  grid-row: span var(--rows);
+  display: grid;
+  grid-template-rows: subgrid;
+  padding: 0.4em 0;
+  border-color: var(--muted);
+}
+
+/* The rows reach the card's edges, so the arrows out of them start at the card's border. */
+.pane-body .flow-card > * {
+  padding: 0 0.8em;
+}
+
+/* A paper's dog-ear. */
+.pane-body .flow-card::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 1px solid var(--muted);
+  border-left: 1px solid var(--muted);
+  border-bottom-left-radius: 2px;
+  background: linear-gradient(to bottom left, var(--bg) 50%, var(--raised) 50%);
+}
+
+.pane-body .flow-card {
+  position: relative;
+}
+
+.pane-body .flow-card > * + * {
+  position: relative;
+}
+
+/* A rule between the card's rows, in the middle of the gap. */
+.pane-body .flow-card > * + *::before {
+  content: '';
+  position: absolute;
+  top: -0.3em;
+  right: 0;
+  left: 0;
+  border-top: 1px solid var(--rule);
+}
+
+/* Too narrow for three columns: the card on the left, and each of its rows' two sums stacked on the right, the sum
+   over all papers above the sum over the checked ones. The staff and compute boxes keep their places on top. */
+@container (width < 540px) {
+  /* Dense, so the card fills the row beside the first heading instead of starting below it. */
+  .pane-body .flow.flow-ledger {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-auto-flow: row dense;
+  }
+
+  .pane-body .flow-ledger > :is(.flow-right, .flow-head, .flow-card ~ .flow-left) {
+    grid-column: 2;
+  }
+
+  .pane-body .flow-ledger > .flow-card {
+    grid-column: 1;
+    grid-row: span var(--rows-2);
+  }
+
+  .pane-body .flow-card > * {
+    grid-row: span 2;
+  }
+
+  .pane-body .flow-ledger > .flow-head {
+    align-self: center;
+  }
+
+  .pane-body .flow-ledger .katex {
+    white-space: normal;
+  }
+}
+
+.flow-arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.flow-arrows path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.flow-arrows .flow-back {
+  stroke-dasharray: 3 3;
+}
+
+.flow-arrows marker path {
+  fill: var(--muted);
+  stroke: none;
+}
+
+.pane-body li + li {
+  margin-top: 0.3em;
+}
+
+:is(.pane-body, .gloss-pop) a {
+  color: inherit;
+  text-decoration: underline 1px var(--muted);
+  text-underline-offset: 0.2em;
+  transition:
+    color 150ms,
+    background-color 150ms,
+    box-shadow 150ms;
+}
+
+:is(.pane-body, .gloss-pop) a:hover {
+  color: var(--accent);
+}
+
+:is(.pane-body, .gloss-pop) a[target='_blank']::after {
+  content: '↗';
+  margin-left: 0.12em;
+  font-size: 0.75em;
+  color: var(--muted);
+}
+
+/* Newsreader's line box sits high (ascent .74em, caps .67em, descent .26em), so the top pad is larger
+   to leave as much room above the capitals as below the baseline. */
+:is(.pane-body, .gloss-pop) .note-link {
+  padding: 0.25em 0.3em 0.06em;
+  border-radius: 0.45em;
+  background: var(--note-bg);
+  text-decoration: none;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+:is(.pane-body, .gloss-pop) .note-link:hover {
+  color: inherit;
+  background: var(--note-bg-strong);
+}
+
+/* Its note is open: tie the link to the column it opened. */
+:is(.pane-body, .gloss-pop) .note-link[data-open] {
+  background: var(--note-bg-strong);
+}
+
+.note-link-end {
+  white-space: nowrap;
+}
+
+/* A note opens to the right of the text (a sheet from the right on a phone), where ↗ leaves the site. */
+.note-link-arrow {
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.18em;
+  vertical-align: -0.02em;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.note-link-missing {
+  color: var(--muted);
+  text-decoration: line-through;
+  cursor: help;
+}
+
+/* ---------- authors (Authors.tsx) ---------- */
+
+/* The heading over the authors is the paper's title: centred with them. */
+.pane-body h1:has(+ .authors) {
+  margin-bottom: 1em;
+  background-position-x: center;
+  text-align: center;
+}
+
+.authors ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3em 2.4em;
+  margin: 0 0 3.2em;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95em;
+  color: var(--muted);
+}
+
+.pane-body .authors li {
+  margin: 0;
+  text-align: center;
+}
+
+/* An affiliation is the *italic* after a name: a smaller line under it. */
+.authors li em {
+  display: block;
+  font-size: 0.85em;
+  font-style: normal;
+}
+
+/* A name is a person, not a page: no ↗, so the names stay balanced. The faint underline still marks the link. */
+.pane-body .authors a {
+  text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent);
+}
+
+.pane-body .authors a::after {
+  content: none;
+}
+
+/* ---------- result table (ResultTable.tsx) ---------- */
+
+.result-table {
+  container-type: inline-size;
+  position: relative; /* for the menu in the margin */
+  margin: 0 0 2.4em;
+}
+
+/* Only if even the narrow layout below doesn't fit; popups are popovers, so this doesn't clip them. */
+.result-table-scroll {
+  overflow-x: auto;
+}
+
+/* The unlimited-hiring switch over a verified or compartmentalized table, drawn like the companion's switch. */
+.result-table-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.4em;
+}
+
+.result-table-hiring {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.result-table-hiring:hover {
+  color: var(--accent);
+}
+
+.result-table-hiring-label {
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.result-table-hiring-track {
+  position: relative;
+  width: 26px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 7px;
+  transition:
+    background-color 150ms,
+    border-color 150ms;
+}
+
+.result-table-hiring-track::after {
+  content: '';
+  position: absolute;
+  top: 1.5px;
+  left: 1.5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  transition:
+    transform 150ms var(--ease),
+    background-color 150ms;
+}
+
+.result-table-hiring[aria-checked='true'] {
+  color: var(--accent);
+}
+
+.result-table-hiring[aria-checked='true'] .result-table-hiring-track {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.result-table-hiring[aria-checked='true'] .result-table-hiring-track::after {
+  background: var(--bg);
+  transform: translateX(12px);
+}
+
+/* The menu of trust models (`menu`, main.mdx; ProtocolMenu.tsx): above the table at its right, like the switch, or in
+   the right margin when the column has room there (Pane.tsx), its label level with "Pause duration" and its rule with
+   the rule under the table's head. */
+.result-table-pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px 10px;
+  margin-bottom: 0.8em;
+  font: 500 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pane[data-aside] .result-table-pick {
+  position: absolute;
+  top: 0;
+  left: calc(100% + var(--pad-x));
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4.5px;
+  width: max-content;
+  margin: 0;
+  padding-top: 0.6em;
+}
+
+/* The menu's button: the name of the model shown, in the table's serif, on a rule like the one under the table's head
+   (and level with it in the margin), with a caret. Every name lies in one grid cell and only the one shown is visible,
+   so the button keeps the longest one's width. */
+.protocol-current {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  padding: 3px 26px 5px 0;
+  border: 0;
+  border-bottom: 1px solid var(--muted);
+  background: none;
+  color: var(--ink);
+  font: 500 17px/1.3 var(--serif);
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+  transition:
+    color 150ms,
+    border-color 150ms;
+}
+
+.protocol-current:hover,
+.protocol-current[aria-expanded='true'] {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+}
+
+.protocol-current:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* the caret, in the accent colour, turned up while the list is open */
+.protocol-current::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--accent);
+  border-bottom: 1.5px solid var(--accent);
+  transform: translateY(-75%) rotate(45deg);
+  transition: transform 150ms var(--ease);
+}
+
+.protocol-current[aria-expanded='true']::after {
+  transform: translateY(-25%) rotate(-135deg);
+}
+
+.protocol-names {
+  display: grid;
+  text-align: left;
+}
+
+.protocol-names > span {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+.protocol-names > [data-shown] {
+  visibility: visible;
+}
+
+/* The list of models: a popover drawn as a popup (.gloss-pop) and placed as one (popup.ts), under the name. A row per
+   model: the "?" of its popup, which opens left of the list, then its name, with an accent dot on the one shown. */
+.protocol-list {
+  inset: auto;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: 0 12px 32px -14px var(--shadow);
+}
+
+.protocol-list:not([data-placed]) {
+  visibility: hidden;
+}
+
+.protocol-option {
+  display: flex;
+  align-items: center;
+}
+
+.protocol-option [role='radio'] {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--ink);
+  font: 500 16px/1.2 var(--serif);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+
+.protocol-option [role='radio']:hover {
+  background: var(--accent-soft);
+}
+
+.protocol-option [role='radio']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.protocol-option [role='radio']::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+}
+
+.protocol-option [role='radio'][aria-checked='true'] {
+  color: var(--accent);
+}
+
+.protocol-option [role='radio'][aria-checked='true']::before {
+  opacity: 1;
+}
+
+/* The "?": a small ring, with a larger target for a finger than it shows. */
+.gloss-term.protocol-help {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: 0 2px 0 8px;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  color: var(--muted);
+  font: 500 11px/1 var(--mono);
+  text-decoration: none;
+  transition:
+    color 150ms,
+    border-color 150ms;
+}
+
+.gloss-term.protocol-help::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.gloss-term.protocol-help:hover,
+.gloss-term.protocol-help[data-open] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* The second table with the switch on: the people the lab hires. */
+.result-table-title {
+  margin: 1.8em 0 0.6em;
+  font: 500 12px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.result-table-note {
+  margin: 0.8em 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.result-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+  line-height: 1.3;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.result-table th,
+.result-table td {
+  padding: 0.6em 0 0.6em 0.9em;
+  text-align: right;
+  vertical-align: baseline;
+}
+
+/* The capability column: its header spans both header rows. */
+.result-table tbody th,
+.result-table thead th[rowspan] {
+  padding-left: 0;
+  text-align: left;
+}
+
+.result-table thead th {
+  padding-bottom: 0.8em;
+  border-bottom: 1px solid var(--muted);
+  font: 500 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  vertical-align: bottom;
+}
+
+/* "Pause duration" over the duration columns, with a short rule under it. */
+.result-table thead .result-table-group {
+  padding-bottom: 0.5em;
+  border-bottom-color: var(--rule);
+  text-align: center;
+}
+
+.result-table thead tr + tr th {
+  padding-top: 0.5em;
+  white-space: nowrap;
+}
+
+.result-table thead th[rowspan] {
+  padding-right: 0.5em;
+  text-wrap: balance;
+}
+
+.result-table tbody tr + tr > * {
+  border-top: 1px solid var(--rule);
+}
+
+.result-table tbody tr:last-child > * {
+  border-bottom: 1px solid var(--muted);
+}
+
+.result-table tbody th {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* A row where the trust model falls back to a simpler one (ResultTable.tsx, fallback()): its numbers are gray. */
+.result-table-fallback td {
+  color: var(--muted);
+}
+
+/* A † on a cell (content/marks/): it hangs right of the number, out of the flow, so the column's numbers stay
+   aligned; the last column makes room for it. `top` lifts it without making its line taller. */
+.result-table td:has(> .result-table-mark) {
+  position: relative;
+}
+
+.result-table table:has(.result-table-mark) :is(td, th):last-child {
+  padding-right: 0.55em;
+}
+
+.gloss-term.result-table-mark {
+  position: absolute;
+  z-index: 1; /* above the next cell, positioned too when it has a mark, which it hangs into */
+  top: 0.45em;
+  margin-left: 0.1em;
+  color: var(--accent);
+  font-size: 0.95em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* A larger target for a finger than the mark shows; not to the right, past the table's edge. */
+.result-table-mark::before {
+  content: '';
+  position: absolute;
+  inset: -0.5em 0 -0.5em -0.6em;
+}
+
+.gloss-term.result-table-mark:hover,
+.gloss-term.result-table-mark[data-open] {
+  color: var(--ink);
+}
+
+.result-table-date {
+  margin-left: 0.7em;
+  font: 400 11px/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.result-table figcaption {
+  margin-top: 1em;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.result-table figcaption p {
+  margin-bottom: 0.6em;
+}
+
+.result-table figcaption p:last-child {
+  margin-bottom: 0;
+}
+
+/* A phone's column: the dates go under the names. */
+@container (width < 480px) {
+  .result-table table {
+    font-size: 15px;
+  }
+
+  .result-table thead tr + tr th {
+    white-space: normal;
+  }
+
+  /* "CAPABILITY" must fit the name column */
+  .result-table thead th {
+    letter-spacing: 0.02em;
+  }
+
+  .result-table thead th[rowspan] {
+    padding-right: 0;
+  }
+
+  .result-table th,
+  .result-table td {
+    padding-left: 0.6em;
+  }
+
+  .result-table-date {
+    display: block;
+    margin: 0.4em 0 0;
+  }
+}
+
+/* ---------- random checks (RandomChecks.tsx, notes/random-checks.mdx) ---------- */
+
+/* Its column names are longer than the durations: they wrap, and the first table's title sits at the top. */
+.random-checks thead th:not([rowspan='2']) {
+  white-space: normal;
+  text-wrap: balance;
+}
+
+.random-checks > .result-table-title:first-child {
+  margin-top: 0;
+}
+
+/* ---------- blind-test scatter plots (BlindPlot.tsx, notes/aisafety-papers.mdx) ---------- */
+
+/* What the authors' figure covers: a categorical trio checked on --bg in both modes (dataviz validate_palette.js,
+   all pairs: CVD ΔE ≥ 8.3, normal vision ≥ 17.7, contrast ≥ 3:1). */
+.blind-plot {
+  --scope-all: #2f6db0;
+  --scope-part: #c8502a;
+  --scope-project: #1d9c7c;
+  position: relative;
+  margin: 0 0 2.4em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .blind-plot {
+    --scope-all: #5a93d6;
+    --scope-part: #de6a3c;
+    --scope-project: #2fa877;
+  }
+}
+
+.blind-plot .bp-all {
+  fill: var(--scope-all);
+  background: var(--scope-all);
+}
+
+.blind-plot .bp-part {
+  fill: var(--scope-part);
+  background: var(--scope-part);
+}
+
+.blind-plot .bp-project {
+  fill: var(--scope-project);
+  background: var(--scope-project);
+}
+
+/* The buttons that show or hide papers by scope, one row above the panels. */
+.blind-plot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.2em;
+}
+
+.blind-plot-legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: none;
+  color: var(--ink);
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.blind-plot-legend button:hover {
+  color: var(--accent);
+}
+
+.blind-plot-legend button[aria-pressed='false'] {
+  color: var(--muted);
+}
+
+.blind-plot-legend button[aria-pressed='false'] .blind-plot-key {
+  opacity: 0.25;
+}
+
+.blind-plot-key {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.blind-plot-count {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.blind-plot-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.6em 24px;
+}
+
+.blind-plot[data-by='year'] .blind-plot-panels {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.2em 16px;
+}
+
+.blind-plot-title {
+  font: 500 12px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.blind-plot-stats {
+  margin: 0.2em 0 0.6em;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--muted);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.blind-plot-stats span {
+  display: block;
+}
+
+.blind-plot svg {
+  display: block;
+  overflow: visible;
+}
+
+.blind-plot .bp-grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.blind-plot .bp-tick {
+  font: 400 10px var(--mono);
+  fill: var(--muted);
+}
+
+.blind-plot .bp-axis {
+  font: 500 10px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  fill: var(--muted);
+}
+
+/* Within ×3 of the authors' figure, and exactly on it. */
+.blind-plot .bp-band {
+  fill: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.blind-plot .bp-diag {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+/* The least-squares line of the log estimate on the log figure. */
+.blind-plot .bp-fit {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
+.blind-plot .bp-dot {
+  stroke: var(--bg);
+  stroke-width: 1.5;
+  opacity: 0.85;
+}
+
+/* The paper under the pointer, in every panel. */
+.blind-plot .bp-lit {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.blind-plot-tip {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  max-width: min(300px, 100%);
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--raised);
+  box-shadow: 0 4px 16px var(--shadow);
+  font-size: 15px;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.blind-plot-tip-id {
+  font: 400 11px/1.3 var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.blind-plot-tip-title {
+  margin: 0.3em 0;
+}
+
+.blind-plot-tip-scope {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.blind-plot-tip table {
+  width: 100%;
+  margin-top: 0.5em;
+  border-top: 1px solid var(--rule);
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.blind-plot-tip th,
+.blind-plot-tip td {
+  padding: 0.35em 0 0 0.8em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.blind-plot-tip th {
+  padding-left: 0;
+  font-weight: 500;
+  text-align: left;
+}
+
+.blind-plot figcaption {
+  margin-top: 1em;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.blind-plot figcaption p {
+  margin-bottom: 0.6em;
+}
+
+.blind-plot figcaption p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- the pile of papers (PilePlot.tsx, notes/model.mdx Reviewer budget) ---------- */
+
+/* A scene drawn in ink on a canvas, with its axis titles laid over it; under it, the meters, the first with a handle. */
+.pile-plot {
+  /* the sea, the drawing's largest mass: ink, and in dark mode a mid grey, so it doesn't glare */
+  --pile-sea: var(--ink);
+  margin: 1.6em 0 2.4em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pile-plot {
+    --pile-sea: color-mix(in srgb, var(--ink) 48%, var(--bg));
+  }
+}
+
+.pile-plot-stage {
+  position: relative;
+  /* a drag turns the scene; it shouldn't select the page's text on the way */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pile-plot-stage canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  cursor: grab;
+  /* on a touch screen, upward drags scroll the page and sideways drags turn the scene */
+  touch-action: pan-y;
+}
+
+.pile-plot-stage canvas:active {
+  cursor: grabbing;
+}
+
+.pile-plot-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font: 500 10.5px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  /* a rim of paper where it crosses a line of the drawing */
+  text-shadow:
+    0 0 2px var(--bg),
+    0 0 3px var(--bg),
+    0 0 4px var(--bg);
+  pointer-events: none;
+}
+
+.pile-plot-title .katex {
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+
+/* The meters share columns: name, track, value. */
+.pile-plot-controls {
+  display: grid;
+  grid-template-columns: max-content minmax(80px, 1fr) 3.6em;
+  align-items: center;
+  gap: 0.5em 14px;
+  margin-top: 0.6em;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.pile-plot-meter {
+  display: contents;
+}
+
+/* q's meter is a slider: a handle on its fill's edge. The range runs half a handle past the frame at each end, so the
+   handle's centre is where the fill ends. */
+.pile-plot-bar input {
+  position: absolute;
+  top: 50%;
+  left: -7.5px;
+  width: calc(100% + 15px);
+  height: 28px;
+  margin: 0;
+  transform: translateY(-50%);
+  background: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.pile-plot-bar input::-webkit-slider-runnable-track {
+  height: 1.5px;
+  background: none;
+}
+
+.pile-plot-bar input::-moz-range-track {
+  height: 1.5px;
+  background: none;
+}
+
+.pile-plot-bar input::-webkit-slider-thumb {
+  width: 15px;
+  height: 15px;
+  margin-top: -6.75px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--ink);
+  appearance: none;
+}
+
+.pile-plot-bar input::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--ink);
+}
+
+.pile-plot-name {
+  color: var(--muted);
+}
+
+.pile-plot-name .katex {
+  color: var(--ink);
+}
+
+/* A meter: an inked frame, filled with hatching up to the share. */
+.pile-plot-bar {
+  position: relative;
+  height: 12px;
+  border: 1.5px solid var(--ink);
+}
+
+.pile-plot-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-right: 1.5px solid var(--ink);
+  background: repeating-linear-gradient(-45deg, var(--ink) 0 1.5px, transparent 1.5px 4.5px);
+}
+
+.pile-plot-value {
+  text-align: right;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.pile-plot figcaption {
+  margin-top: 1em;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ---------- the paper count n(t) (PaperCountPlot.tsx, notes/model.mdx Paper count), and the people hired
+   (HiringPlot.tsx, main.mdx Verifiers Headcount) ---------- */
+
+/* Monochrome: the counts in ink, the grid and ticks recessive. */
+.paper-plot {
+  margin: 1.6em 0 2.4em;
+}
+
+.paper-plot-axis,
+.paper-plot-named {
+  font: 500 10px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.paper-plot-axis {
+  margin-bottom: 0.6em;
+}
+
+.paper-plot-axis .katex,
+.paper-plot-named .katex {
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+
+/* The dataset's label, up and left of its last point. */
+.paper-plot-named {
+  position: absolute;
+  color: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.paper-plot-box {
+  position: relative;
+}
+
+.paper-plot-box > svg {
+  display: block;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+.paper-plot .pp-grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.paper-plot .pp-tick {
+  font: 400 10px var(--mono);
+  fill: var(--muted);
+}
+
+.paper-plot .pp-label {
+  font: 500 10px var(--mono);
+  letter-spacing: 0.06em;
+  fill: var(--ink);
+}
+
+.paper-plot .pp-cross {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.paper-plot .pp-data,
+.paper-plot .pp-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.paper-plot .pp-data {
+  stroke-width: 1.5;
+}
+
+.paper-plot .pp-line {
+  stroke-width: 2;
+}
+
+.paper-plot .pp-dot {
+  fill: var(--ink);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.paper-plot-tip {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--raised);
+  box-shadow: 0 4px 16px var(--shadow);
+  font-size: 14px;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.paper-plot-tip-date {
+  font: 400 11px/1.3 var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.paper-plot-tip table {
+  margin-top: 0.3em;
+  border-collapse: collapse;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.paper-plot-tip th,
+.paper-plot-tip td {
+  padding: 0.2em 0 0 0.9em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.paper-plot-tip th {
+  padding-left: 0;
+  font-weight: 500;
+  text-align: left;
+}
+
+.paper-plot-tip td:last-child {
+  color: var(--muted);
+}
+
+.paper-plot figcaption {
+  margin-top: 1em;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* AI safety years against people hired (HiringCurve.tsx, main.mdx Verifiers Headcount) and against auditors
+   (AuditorCurve.tsx, notes/model.mdx Number of auditors): a .paper-plot with the scenario's menu (a pill as the blind
+   test's buttons) or the pause's slider above it, and the x axis's title under the ticks. */
+.hiring-curve-pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-bottom: 1.2em;
+  font: 500 10px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hiring-curve-select {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.hiring-curve-select select {
+  appearance: none;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0 34px 0 14px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: none;
+  color: var(--ink);
+  font: 500 12px/1 var(--mono);
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: border-color 150ms;
+}
+
+.hiring-curve-select select:hover {
+  border-color: var(--muted);
+}
+
+.hiring-curve-select select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* the menu's chevron */
+.hiring-curve-select::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.hiring-curve .pp-end {
+  font: 500 10px var(--mono);
+  letter-spacing: 0.06em;
+  fill: var(--muted);
+}
+
+.hiring-curve-x {
+  margin: 0.2em 50px 0 0; /* the plot's right margin, HiringCurve.tsx */
+  text-align: right;
+}
+
+/* The slow lab's handoff delay (SlowScaling.tsx, notes/slow-scaling.mdx), and its worked example: the fast lab in ink,
+   the slow lab in the accent; a dashed outline while a lab does no safety research. */
+.slow-scaling-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 22px;
+  margin-bottom: 0.6em;
+}
+
+.slow-scaling-picks .hiring-curve-pick {
+  margin-bottom: 0.6em;
+}
+
+/* The example's sliders (.plot-slider, below). */
+.slow-scaling-sliders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 28px;
+  margin-bottom: 0.8em;
+}
+
+/* A slider above a plot: an inked rule and a round handle, as PilePlot's (SlowScaling.tsx, AuditorCurve.tsx). */
+.plot-slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 280px; /* in a row of sliders */
+  white-space: nowrap;
+  font: 500 10px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plot-slider input {
+  flex: 1;
+  min-width: 80px;
+  height: 28px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.plot-slider input::-webkit-slider-runnable-track {
+  height: 1.5px;
+  background: var(--ink);
+}
+
+.plot-slider input::-moz-range-track {
+  height: 1.5px;
+  background: var(--ink);
+}
+
+.plot-slider input::-webkit-slider-thumb {
+  width: 15px;
+  height: 15px;
+  margin-top: -6.75px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--ink);
+  appearance: none;
+}
+
+.plot-slider input::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--ink);
+}
+
+.plot-slider input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.plot-slider-value {
+  min-width: 6.5em;
+  font: 500 12px var(--mono);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.slow-scaling-sliders .plot-slider > span:first-child {
+  min-width: 12.5em; /* the longer label's: the two tracks line up */
+}
+
+.auditor-curve .plot-slider {
+  max-width: 420px;
+  margin-bottom: 1.2em;
+}
+
+.slow-scaling .ss-row,
+.slow-scaling .ss-title {
+  font: 500 10px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.slow-scaling .ss-row {
+  fill: var(--ink);
+}
+
+.slow-scaling .ss-title {
+  fill: var(--muted);
+}
+
+.slow-scaling .ss-bar-text {
+  font: 400 10px var(--mono);
+  fill: var(--ink);
+}
+
+.slow-scaling .ss-guide {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.slow-scaling rect.ss-race,
+.slow-scaling rect.ss-scale {
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.slow-scaling rect.ss-race {
+  fill: none;
+  stroke: var(--ink);
+}
+
+.slow-scaling rect.ss-scale {
+  fill: color-mix(in srgb, var(--accent) 6%, transparent);
+  stroke: var(--accent);
+}
+
+.slow-scaling rect.ss-fast,
+.slow-scaling rect.ss-slow {
+  stroke-width: 1;
+}
+
+.slow-scaling rect.ss-fast {
+  fill: color-mix(in srgb, var(--ink) 14%, transparent);
+  stroke: var(--ink);
+}
+
+.slow-scaling rect.ss-slow {
+  fill: color-mix(in srgb, var(--accent) 28%, transparent);
+  stroke: var(--accent);
+}
+
+.slow-scaling .ss-only-fast {
+  fill: color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.slow-scaling .ss-both {
+  fill: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.slow-scaling .ss-only-slow {
+  fill: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.slow-scaling-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 0.4em;
+  font: 400 11px/1.4 var(--mono);
+  color: var(--muted);
+}
+
+.slow-scaling-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slow-scaling-key i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.slow-scaling-key i.ss-only-fast {
+  background: color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.slow-scaling-key i.ss-both {
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  outline: 1px solid var(--rule);
+}
+
+.slow-scaling-key i.ss-only-slow {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* ---------- tornado plots (Tornado.tsx, notes/sensitivity.mdx): a .paper-plot per set of inputs, with a plot per
+   result, each a row per input: its name left of its bars (above them when narrow), the bars from the middle line ---------- */
+
+/* Two shades of ink: the input at its 10th percentile pale, at its 90th full ink (an ordinal pair: 3.4:1 against the
+   paper in light, 4.4:1 in dark). */
+.tornado {
+  --tornado-p10: color-mix(in srgb, var(--ink) 50%, var(--bg));
+  --tornado-p90: var(--ink);
+}
+
+.tornado [data-end='p10'] {
+  background: var(--tornado-p10);
+}
+
+.tornado [data-end='p90'] {
+  background: var(--tornado-p90);
+}
+
+.tornado-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-bottom: 1.8em;
+  font: 500 10px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tornado-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tornado-swatch {
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.tornado-plot + .tornado-plot {
+  margin-top: 2.6em;
+}
+
+/* the middle's value, over its line */
+.tornado-head {
+  position: relative;
+  height: 16px;
+}
+
+.tornado-head span {
+  position: absolute;
+  bottom: 3px;
+  transform: translateX(-50%);
+  font: 500 10px var(--mono);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.tornado-row {
+  display: grid;
+  align-items: center;
+  outline: none;
+}
+
+.tornado-label {
+  padding: 6px 0;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.tornado-range {
+  display: block;
+  margin-top: 2px;
+  font: 400 10px/1.4 var(--mono);
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.tornado-bars {
+  position: relative;
+  align-self: stretch;
+  min-height: 30px;
+  touch-action: pan-y;
+}
+
+.tornado-row[data-on] .tornado-bars {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.tornado-row:focus-visible .tornado-bars {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.tornado-grid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--rule);
+}
+
+.tornado-grid[data-middle] {
+  background: var(--ink);
+}
+
+/* square at the middle line, rounded at the end */
+.tornado-bar {
+  position: absolute;
+  top: 50%;
+  height: 12px;
+  margin-top: -6px;
+}
+
+.tornado-bar[data-side='left'] {
+  border-radius: 4px 0 0 4px;
+}
+
+.tornado-bar[data-side='right'] {
+  border-radius: 0 4px 4px 0;
+}
+
+/* the shorter of two bars to the same side lies on the longer, thinner, ringed with paper */
+.tornado-bar[data-inner] {
+  height: 6px;
+  margin-top: -3px;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+.tornado-axis {
+  position: relative;
+  height: 22px;
+}
+
+.tornado-axis span {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  font: 400 10px var(--mono);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* between 0 and the log scale */
+.tornado-break {
+  position: absolute;
+  top: 7px;
+  width: 6px;
+  height: 9px;
+  margin-left: -3px;
+  border-inline: 1px solid var(--muted);
+  transform: skewX(-25deg);
+}
+
+/* a tooltip row's key: a short stroke in its bar's shade */
+.tornado-tip-key {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  margin-right: 7px;
+  border-radius: 1.5px;
+  vertical-align: middle;
+}
+
+.tornado-tip-note {
+  margin-top: 0.4em;
+  font: 400 11px/1.3 var(--mono);
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.tornado-still {
+  margin: 1em 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ---------- parameter table (notes/parameters.mdx) ---------- */
+
+/* <table className="parameter-table"> in .mdx: a <tbody> per trust model, its name in the first row, then a row per
+   parameter (<Parameter>, Parameter.tsx): its symbol above its name, its estimate (<Value>), the button that unfolds
+   the rationale, and under them, the width of the table, the rationale. The rationale runs to paragraphs, so the rows
+   are grids that give it a line of its own, in the text's size. */
+.parameter-table {
+  display: block;
+  margin: 0 0 2.4em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.parameter-table :is(thead, tbody) {
+  display: block;
+}
+
+.parameter-table tr {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) 22px;
+  column-gap: 0.9em;
+  align-items: baseline;
+  padding: 0.6em 0;
+}
+
+.parameter-table th,
+.parameter-table td {
+  padding: 0;
+  text-align: left;
+}
+
+.parameter-table thead tr {
+  padding: 0 0 0.8em;
+  border-bottom: 1px solid var(--muted);
+}
+
+.parameter-table thead th {
+  font: 500 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* A trust model's name, with a rule above it from the second model on. */
+.parameter-table tbody th {
+  grid-column: 1 / -1;
+  padding-top: 0.8em;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.parameter-table tbody + tbody tr:first-child {
+  border-top: 1px solid var(--muted);
+}
+
+/* Rules between the parameters, none under the model's name. */
+.parameter-table tbody tr + tr + tr {
+  border-top: 1px solid var(--rule);
+}
+
+/* The parameter's name, small and grey, under its symbol. */
+.parameter-table td:first-child {
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+.parameter-table td:first-child > .katex:first-child {
+  display: block;
+  margin-bottom: 0.15em;
+  font-size: 1.25em; /* 1.1em of the estimate's 17px, as maths elsewhere */
+  color: var(--ink);
+}
+
+.parameter-table td:nth-child(2) {
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+/* The estimate's [p10; p90] (<Range>), small and grey, under it. */
+.parameter-table .range {
+  display: block;
+  margin-top: 0.15em;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* A row with a rationale unfolds it on a click, anywhere but on a symbol or a link, or on its button, a chevron that
+   turns over. */
+.parameter[data-folds] {
+  cursor: pointer;
+}
+
+.parameter-toggle {
+  align-self: center;
+}
+
+.parameter-toggle button {
+  display: block;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.parameter-toggle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: rotate 200ms;
+}
+
+.parameter[data-folds]:hover .parameter-toggle button,
+.parameter-toggle button:focus-visible {
+  color: var(--accent);
+}
+
+.parameter[data-open] .parameter-toggle svg {
+  rotate: 180deg;
+}
+
+/* The rationale: paragraphs and lists, spaced as in the text but none under the last. Folded, it is hidden until
+   found: laid out with no height, so it drops its padding too. */
+.parameter-rationale {
+  grid-column: 1 / -1;
+  padding-top: 0.6em;
+  cursor: auto;
+}
+
+.parameter-rationale[hidden] {
+  padding-top: 0;
+}
+
+.parameter-rationale > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- popups (Gloss.tsx) ---------- */
+
+.gloss-term {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: help;
+  text-decoration: underline dotted 1.5px var(--muted);
+  text-underline-offset: 0.22em;
+  transition:
+    color 150ms,
+    text-decoration-color 150ms;
+}
+
+.gloss-term:hover,
+.gloss-term[data-open] {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* A popover is centred in the window by default; Gloss.tsx sets left and top instead. */
+.gloss-pop {
+  inset: auto;
+  width: max-content;
+  max-width: min(21rem, 100vw - 16px);
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: 0 12px 32px -14px var(--shadow);
+  font: 400 15px/1.45 var(--serif);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+}
+
+.gloss-pop:not([data-placed]) {
+  visibility: hidden;
+}
+
+.gloss-pop p {
+  margin: 0 0 0.5em;
+}
+
+.gloss-pop p:last-child {
+  margin-bottom: 0;
+}
+
+.gloss-pop .gloss-title {
+  font-weight: 600;
+}
+
+.gloss-pop ul,
+.gloss-pop ol {
+  margin: 0 0 0.5em;
+  padding-left: 1.2em;
+}
+
+/* A quotation in a popup: set off by a rule on its left, in italics. */
+.gloss-pop blockquote {
+  margin: 0 0 0.5em;
+  padding-left: 0.75em;
+  border-left: 2px solid var(--rule);
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
+  font-style: italic;
+}
+
+.gloss-pop blockquote:last-child {
+  margin-bottom: 0;
+}
+
+.gloss-pop .katex-display {
+  margin: 0.3em 0;
+  padding: 0.3em 0;
+}
+
+/* ---------- footnotes (Footnote.tsx, footnotes.ts) ---------- */
+
+/* The word before a footnote and its mark. */
+.footnote-end {
+  white-space: nowrap;
+}
+
+/* A small raised mark; `top` lifts it without making its line taller. */
+.gloss-term.footnote-ref {
+  position: relative;
+  top: -0.2em;
+  display: inline-grid;
+  place-items: center;
+  width: 1.1em;
+  height: 1.1em;
+  margin-left: 0.04em;
+  border-radius: 0.25em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 150ms;
+}
+
+/* A larger target for a finger than the mark shows. */
+.footnote-ref::before {
+  content: '';
+  position: absolute;
+  inset: -0.45em;
+}
+
+.gloss-term.footnote-ref:hover,
+.gloss-term.footnote-ref[data-open] {
+  background: var(--note-bg-strong);
+}
+
+/* A magnifying glass, as a mask: the accent colour shows through its shape. */
+.footnote-mark {
+  width: 0.92em;
+  height: 0.92em;
+  background: var(--accent);
+  -webkit-mask: url('./magnifier.svg') center / contain no-repeat;
+  mask: url('./magnifier.svg') center / contain no-repeat;
+}
+
+/* ---------- citations (Cite.tsx, citations.ts) ---------- */
+
+/* A source, not part of the argument: quieter than the text. */
+.gloss-term.cite-ref:not(:hover, [data-open]) {
+  color: var(--muted);
+  text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent);
+}
+
+/* "(Lifland et al., 2025;": a line may break on either side of a button, even after "(". */
+.cite-item {
+  white-space: nowrap;
+}
+
+/* Popups of terms inside a popup are rendered in it (Gloss.tsx); this holder takes no room. */
+.gloss-inside {
+  display: contents;
+}
+
+/* The reference list: second lines indented, as in a paper. */
+.pane-body .references p {
+  margin-bottom: 0.7em;
+  padding-left: 1.6em;
+  text-indent: -1.6em;
+  font-size: 0.92em;
+  text-wrap: wrap;
+}
+
+/* The credit line at the end of the main note. */
+.pane-body .colophon {
+  margin-top: 2.5em;
+  color: var(--muted);
+  font-size: 0.8em;
+}
+
+.pane-body .colophon a {
+  color: inherit;
+}
+
+/* ---------- symbols (Symbols.tsx, symbols.ts) ---------- */
+
+/* A symbol of a formula that has an entry in content/symbols.mdx: KaTeX's own glyphs in a plain span, so only the
+   colour may change. */
+.katex [data-sym] {
+  cursor: help;
+}
+
+/* KaTeX's invisible boxes overlap the glyphs (struts reach far above a subscript, the depth of a fraction covers its
+   denominator) and would catch the pointer; in a formula with symbols only the glyphs of symbols take it. */
+.katex-html:has([data-sym]) * {
+  pointer-events: none;
+}
+
+.katex-html [data-sym] .mord:not(:has(*)) {
+  pointer-events: auto;
+}
+
+/* One of our inputs (symbols.ts marks it `data-ours`): its value is our estimate (notes/parameters.mdx). */
+.katex [data-sym][data-ours],
+.gloss-pop .symbol-ours {
+  color: var(--ours);
+}
+
+.katex [data-sym][data-open] {
+  color: var(--accent);
+}
+
+/* The symbols in the open one's exponent keep the formula's colour, or ours. */
+.katex [data-sym][data-open] [data-sym] {
+  color: var(--ink);
+}
+
+.katex [data-sym][data-open] [data-sym][data-ours] {
+  color: var(--ours);
+}
+
+.pane-body .unused .katex [data-sym][data-open] [data-sym] {
+  color: var(--muted);
+}
+
+/* The symbol on top of its entry. */
+.gloss-pop .symbol-tex {
+  margin-bottom: 0.35em;
+  font-size: 1.2em;
+}
+
+/* Units and value: mono labels beside their values. */
+.symbol-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.15em 0.9em;
+  margin: 0.7em 0 0;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--rule);
+}
+
+.symbol-facts div {
+  display: contents;
+}
+
+.symbol-facts dt,
+.symbol-source {
+  font: 500 10.5px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.symbol-facts dd {
+  margin: 0;
+}
+
+.symbol-source,
+.symbol-estimate {
+  margin-left: 0.7em;
+}
+
+/* Sections of AIFM's supplementary materials, one per line. */
+.symbol-sections a {
+  display: block;
+}
+
+.symbol-sections a + a {
+  margin-top: 0.2em;
+}
+
+/* ---------- incident cards (Incident.tsx) ---------- */
+
+/* A card framed like a plate, as the executive summary is: a rule with a thin one inset inside it,
+   around smoother paper. A hatched cast shadow, the plates' way of shading, sets it on the page like a slab.
+   --mass is the black under the model's words (.said), kept dark in both modes like the hidden face of the note's
+   backdrop; --on-mass is the pale ink on it. */
+.incident {
+  --mass: #161616;
+  --on-mass: #f2f2ef;
+  --hatch: 6px;
+  position: relative;
+  margin: 0 0 calc(1.3em + var(--hatch));
+  padding: 22px 26px 18px;
+  border: 1px solid var(--plate-ink);
+  background: var(--raised);
+  box-shadow:
+    inset 0 0 0 4px var(--raised),
+    inset 0 0 0 5px var(--muted);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .incident {
+    --mass: #0b0b0b;
+    --on-mass: #d9d9d5;
+  }
+}
+
+.stack[data-mode='mobile'] .incident {
+  --hatch: 5px;
+  padding: 18px 18px 15px;
+}
+
+/* The shadow: ruled diagonals in the L that the card leaves when moved down and right by --hatch (border included). */
+.incident::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--hatch) - 1px) calc(-1px - var(--hatch)) calc(-1px - var(--hatch)) calc(var(--hatch) - 1px);
+  background: repeating-linear-gradient(-45deg, var(--muted) 0 1px, transparent 1px 3.5px);
+  clip-path: polygon(
+    calc(100% - var(--hatch)) 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 calc(100% - var(--hatch)),
+    calc(100% - var(--hatch)) calc(100% - var(--hatch))
+  );
+  pointer-events: none;
+}
+
+.incident > :last-child {
+  margin-bottom: 0;
+}
+
+.pane-body .incident h3 {
+  margin: 0 0 0.5em;
+  font-size: 1.2em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+/* The year, set off to the right of the title in the muted ink of the source line, on the title's first baseline. */
+.pane-body .incident h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.incident .incident-year {
+  flex: none;
+  font-size: 14px;
+  font-weight: normal;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.incident .incident-source {
+  margin: 0.9em 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* The model's own words: pale ink on a black mass inside a thin inset rule, like the white-on-black plates, with
+   whose words they are lettered under them in spaced capitals, as a plate's title is under its picture. */
+.said {
+  margin: 1.1em 0 1em;
+  padding: 18px 22px 13px;
+  background: var(--mass);
+  color: var(--on-mass);
+  box-shadow:
+    inset 0 0 0 5px var(--mass),
+    inset 0 0 0 6px color-mix(in srgb, var(--on-mass) 32%, transparent);
+}
+
+.stack[data-mode='mobile'] .said {
+  padding: 15px 16px 11px;
+}
+
+.said blockquote {
+  margin: 0;
+  font: italic 400 17px/1.5 var(--serif);
+  overflow-wrap: break-word;
+}
+
+.pane-body .said blockquote p {
+  margin: 0 0 0.6em;
+}
+
+.pane-body .said blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.said figcaption {
+  margin-top: 1em;
+  font: 400 11px/1.4 var(--serif);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+  color: color-mix(in srgb, var(--on-mass) 58%, transparent);
+}
+
+.said ::selection {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* ---------- executive summary (Summary.tsx) ---------- */
+
+/* Framed like a plate: a rule with a thin one inset inside it, around smoother paper, in the plates'
+   ink, so in dark mode the frame is dimmer than the text. --branch: the tree's lines, a little darker than rules. */
+.summary {
+  --branch: color-mix(in srgb, var(--muted) 45%, var(--rule));
+  container-type: inline-size;
+  margin: 2.2em 0 0;
+  padding: 30px 34px 28px;
+  border: 1px solid var(--plate-ink);
+  background: var(--raised);
+  box-shadow:
+    inset 0 0 0 5px var(--raised),
+    inset 0 0 0 6px var(--muted);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.stack[data-mode='mobile'] .summary {
+  padding: 24px 20px 22px;
+}
+
+.summary > :last-child {
+  margin-bottom: 0;
+}
+
+/* Its title, marked like the page's headings. */
+.pane-body .summary h2 {
+  margin: 0 0 1.2em;
+  font-size: 1.4em;
+}
+
+.pane-body .summary h2::after {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 2px;
+  margin-top: 0.45em;
+  background: var(--accent);
+}
+
+/* A part: a small label with a rule running on from it, like the result table's headers. */
+.pane-body .summary h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  margin: 2em 0 1em;
+  font: 500 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pane-body .summary h2 + h3 {
+  margin-top: 0;
+}
+
+.summary h3::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--rule);
+}
+
+.pane-body .summary ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A flat list: headline points, numbered in the accent colour, side by side when there is room. */
+.summary > ul:not(:has(ul)) {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  counter-reset: point;
+}
+
+.pane-body .summary > ul:not(:has(ul)) > li {
+  margin: 0;
+  padding: 0 1.1em;
+  font-size: 1.12em;
+  font-weight: 500;
+  line-height: 1.3;
+  counter-increment: point;
+}
+
+.summary > ul:not(:has(ul)) > li:first-child {
+  padding-left: 0;
+}
+
+.summary > ul:not(:has(ul)) > li:last-child {
+  padding-right: 0;
+}
+
+.summary > ul:not(:has(ul)) > li + li {
+  border-left: 1px solid var(--rule);
+}
+
+.summary > ul:not(:has(ul)) > li::before {
+  content: counter(point);
+  display: block;
+  margin-bottom: 0.15em;
+  font-size: 1.9em;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--accent);
+}
+
+@container (width < 480px) {
+  .summary > ul:not(:has(ul)) {
+    grid-auto-flow: row;
+    row-gap: 0.7em;
+  }
+
+  .pane-body .summary > ul:not(:has(ul)) > li {
+    display: grid;
+    grid-template-columns: 1.3em 1fr;
+    align-items: baseline;
+    padding: 0;
+  }
+
+  .summary > ul:not(:has(ul)) > li + li {
+    border-left: 0;
+  }
+
+  .summary > ul:not(:has(ul)) > li::before {
+    margin: 0;
+    font-size: 1.4em;
+  }
+}
+
+/* A nested list: a tree. Its top items head their branches, with a rule between them. */
+.pane-body .summary > ul:has(ul) > li {
+  margin: 0;
+  padding: 0.75em 0;
+  font-weight: 600;
+}
+
+.pane-body .summary > ul:has(ul) > li:first-child {
+  padding-top: 0;
+}
+
+.pane-body .summary > ul:has(ul) > li:last-child {
+  padding-bottom: 0;
+}
+
+.summary > ul:has(ul) > li + li {
+  border-top: 1px solid var(--rule);
+}
+
+/* Branches hang from a ruled line, each item on a short tick from it, like a drawn tree. Each item draws its piece
+   of the line, from the gap above it on down; the last one stops at its tick. */
+.pane-body .summary li > ul {
+  margin: 0.35em 0 0 0.25em;
+  padding-left: 1.15em;
+  font-weight: 400;
+}
+
+.pane-body .summary li li {
+  --gap: 0.3em;
+  --tick: 0.75em;
+  position: relative;
+  margin-top: var(--gap);
+}
+
+.summary li li::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--gap));
+  bottom: 0;
+  left: -1.15em;
+  width: 0.7em;
+  background:
+    linear-gradient(var(--branch), var(--branch)) left top / 1px 100% no-repeat,
+    linear-gradient(var(--branch), var(--branch)) left calc(var(--gap) + var(--tick)) / 100% 1px no-repeat;
+}
+
+.summary li li:last-child::before {
+  bottom: auto;
+  height: calc(var(--gap) + var(--tick) + 1px);
+}
+
+/* The first level's ticks end in a dot of the accent. */
+.summary > ul > li > ul > li::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--tick) - 2px);
+  left: calc(-0.45em - 2px);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ---------- motion ---------- */
+
+/* Width changes of the columns animate only while Stack.tsx sets data-animate (just after a note
+   opens or closes), so resizing the window or switching layout doesn't drag the text around. Like the other custom
+   properties registered with `inherits: false`, it isn't passed down into the text, so that setting it restyles a few
+   elements rather than every element of the notes, which would hold up the animation. */
+@property --shift {
+  syntax: '<time>';
+  inherits: false;
+  initial-value: 0s;
+}
+
+.stack[data-animate] :is(.pane, .pane-scroll) {
+  --shift: var(--dur);
+}
+
+/* One animation for a new note in both layouts, so a layout switch doesn't replay it. */
+.stack[data-mode='desktop'] {
+  --enter-x: 28px;
+  --enter-opacity: 0;
+}
+
+.stack[data-mode='mobile'] {
+  --enter-x: 100%;
+  --enter-opacity: 1;
+}
+
+/* Filled backwards: Stack.tsx may start the motion a frame or two late, and until then a note opened shows as it starts. */
+.pane:not(:first-child) {
+  animation: enter 320ms var(--ease) backwards;
+}
+
+@keyframes enter {
+  from {
+    opacity: var(--enter-opacity);
+    transform: translateX(var(--enter-x));
+  }
+}
+
+/* A drawing fades in, a little slower than its column, like ink coming up on paper. */
+.plate-art {
+  animation: plate-in 700ms var(--ease) backwards;
+}
+
+@keyframes plate-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.pane.flash .pane-scroll {
+  animation: flash 1s var(--ease);
+}
+
+@keyframes flash {
+  from {
+    background-color: var(--accent-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,158 @@
+---
+title: AI Safety Papers
+numbered: true
+---
+
+{/* Tables use the result-table styles; rowSpan={1} left-aligns a first column header as in ResultTable.tsx. Numbers
+    from safety_papers/ (README.md, results/blind_test.md, data/runs/census/report.md). */}
+
+To estimate input parameters, we collected a dataset of AI safety papers.
+
+## ML Papers
+
+We downloaded the metadata of every paper first posted to arXiv in 2020–2025 in at least one of 18 ML-related categories (cs.LG, cs.CL, cs.CV, cs.AI, stat.ML, cs.CR and others): 495,374 papers, from 54,254 in 2020 to 129,226 in 2025.
+
+## Which of Them Are AI Safety
+
+We selected the AI safety papers with Claude Sonnet 5.5, which read each paper's title and abstract. See the [exact prompt](note:aisafety-prompt) we used.
+
+We found:
+
+- interpretability and explainability: 9,558 papers
+- adversarial robustness: 7,856
+- science of deep learning (generalization, memorization, training dynamics): 3,927
+- jailbreaks, red-teaming, prompt injection and safeguards: 2,879
+- alignment experiments (reward hacking, deception, model organisms, oversight, chain of thought): 567
+- unlearning: 505
+- dangerous-capability evaluations and AI control: 411
+
+That's 25,703 papers: 4.7% of the ML papers of 2020 and 5.9% of those of 2025.
+
+This filtered out:
+
+- theory, surveys, hallucination, privacy, fairness, watermarks, preference learning, safe RL, governance and capability prediction;
+- 37 papers that Sonnet refused to label, mostly on pathogens and hacking.
+
+## Compute
+
+Few papers state their total compute, so we used LLMs to estimate it from each paper's full text (see the quality analysis below). The full texts come from the latest version of each paper's PDF.
+
+We count compute in H100e-years, as [AI 2027](https://ai-2027.com/research/compute-forecast) and AIFM do. An H100e is an accelerator's processing power in units of an H100's, measured by TPP (Total Processing Performance, the US export-control metric: dense operations per second times their bit length). An H100e-year is one H100e used for a year. So an hour on a GPU counts as its share of an H100-hour: 0.32 for an A100, 0.14 for an RTX 3090, 0.13 for a V100 and 0.023 for a GTX 1080 Ti.
+
+### One Paper's Compute
+
+The model gets the paper's full text, the year it was first posted and the work to estimate, with these [instructions](note:aisafety-compute-prompt). It reports what the authors ran and doesn't convert anything. We do the conversion later.
+
+#### Reported Experiments
+The model counts every experiment the paper reports, once, as the authors ran it: all models, datasets, conditions and seeds, ablations, appendix experiments, baselines the authors ran themselves, the hyperparameter searches the paper describes, and evaluations and data generation with local models. We don't count calls to hosted models through an API or the pretraining of models the authors downloaded.
+
+The model splits this work into parts. A part comes from the authors' own figure if the paper gives one, otherwise from the model's estimate. Either way it takes one of two forms:
+
+- hours on a GPU: the one the paper names, or, if it names none, a GPU typical for its year and kind of work (a GTX 1080 Ti or RTX 2080 Ti for small models in 2020–2021, an A100 for language models in 2024–2025). For small models the model estimates how long a run really takes on that GPU; the instructions give examples, such as 0.7 hours to train ResNet-18 on CIFAR-10 for 100 epochs on a GTX 1080 Ti. We multiply the hours by the GPU's share of an H100;
+- FLOP, for models with 1B parameters or more and for text generation with any model: $6NT$ to train, $4NT$ to backpropagate through frozen weights (LoRA, steering vectors) and $2NT$ for forward passes and generation, with $N$ parameters and $T$ tokens. We divide them by what an H100 computes in a year at a utilization for the kind of work: training, forward passes or generation. At full use, an H100 does $989 \times 10^{12}$ dense 16-bit FLOP per second.
+
+#### Calibration
+We see that the model's estimates are biased: runs take longer than it expects, and its FLOP estimates, converted at the 40% utilization usually assumed for large training runs, come out several times too low. So we multiply estimated hours by a factor and convert FLOP at a lower utilization, both measured on the test below (see Calibration). Figures the authors state in hours are not changed.
+
+#### Dead Ends
+Papers report the experiments that worked, not the pilots, failed runs and debugging behind them. Some papers state the compute of the whole project, including that unreported work; then we take that figure as the paper's compute. It has to say it includes such work: a total "for all experiments" or "for this paper" is the reported experiments, even when the paper calls it the total. Otherwise, we count the paper's compute as 2.5 times its reported experiments. We chose 2.5 because the 23 test papers that state both figures have a median ratio of 2.65.
+
+For example, a paper says its main model trained on 8 A100s for 3 days, and the model estimates 200 hours on the paper's RTX 3090 for the ablations. The training run is 8 × 72 = 576 A100-hours, or 576 × 0.32 = 184 H100e-hours. The ablations are an estimate, so they get Opus's factor: 200 × 1.4 = 280 hours, or 280 × 0.14 = 39 H100e-hours. The reported experiments come to 223 H100e-hours. The paper doesn't state the whole project's compute, so the paper's compute is 2.5 × 223 = 558 H100e-hours: 0.064 H100e-years.
+
+### Testing the Estimates
+
+We measured how accurate the estimates are. We took a subset of papers that state their compute (for all their experiments, a part of them or the whole project) and cut it out of the text. Then we asked LLMs to estimate the compute from the cleaned full texts and compared their estimates with the authors' figures, converted with the same GPU shares.
+
+From each paper we cut every passage either model quoted on time, cost, energy or speed, then every sentence that still matched the text search or gave a run time ("takes 36.9 s", "24h training"). Passages that only name the hardware stay. On average this cut 0.6% of a paper's text. Sonnet 5.5 and Opus 5.5 then estimated the same work from the rest, at medium effort, with the instructions above.
+
+Each paper is compared once, with the estimate of the same work:
+
+- the authors' figure for all their experiments, or for a named part, with the model's estimate of that work (669 papers);
+- the authors' figure for the whole project with 2.5 times the model's estimate of all reported experiments (37 papers).
+
+The table and the plots below show the estimates before calibration.
+
+## Results
+
+<figure className="result-table">
+<div className="result-table-scroll">
+<table>
+<thead>
+<tr><th scope="col" rowSpan={1}>Model</th><th scope="col">Median estimate / authors' figure</th><th scope="col">Within ×3</th><th scope="col">Within ×10</th><th scope="col">Typical error</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">Sonnet 5.5</th><td>×0.33</td><td>40%</td><td>72%</td><td>×5.8</td></tr>
+<tr><th scope="row">Opus 5.5</th><td>×0.46</td><td>45%</td><td>78%</td><td>×4.8</td></tr>
+</tbody>
+</table>
+</div>
+<figcaption></figcaption>
+</figure>
+
+<BlindPlot>
+The model's estimate vs. the compute actually used.
+</BlindPlot>
+
+- Both models underestimate. Runs take longer than the models expect.
+- A single estimate is a rough guess, off by a factor of 5.8 (Sonnet) or 4.8 (Opus) on a typical paper.
+- The estimates compress the spread: big papers come out too small and small papers too big (the slope of the log estimate on the log of the authors' figure is 0.72 for Sonnet and 0.79 for Opus).
+- Both models miss on the same papers: their log errors correlate at 0.76, and the mean of the two is no better than Opus alone (typical error ×4.9).
+- Sonnet's median ratio is ×0.76 in 2020 and ×0.31–0.40 in 2021–2025. Opus's is ×0.51–0.99 in 2020–2024 and ×0.29 in 2025: later papers are more often estimated from FLOP (by Opus none in 2020–2022, 55% in 2025), where 40% utilization undercounts most.
+
+<BlindPlot by="year">
+Sonnet 5.5's estimates before calibration against the authors' figures, by the year the paper was posted.
+</BlindPlot>
+
+### Calibration
+
+We fitted the calibration on the same papers, separately for each model:
+
+- estimated hours are multiplied by 2.2 (Sonnet) and 1.4 (Opus): the median ratio of the authors' figure to the estimates made mostly in hours. Hours the paper states stay as they are.
+
+The 2.5 for dead ends doesn't depend on the model.
+
+After calibration the median estimate equals the authors' figure for both models; 48% (Sonnet) and 51% (Opus) of the estimates are within ×3, and the typical error is ×4.1 and ×3.8. The median by year stays within ×0.76–1.66 for Sonnet and ×0.71–1.39 for Opus. Fitting the calibration on half of the papers and testing it on the other half gives medians of ×0.77–1.26.
+
+## Every Paper's Compute
+
+We used Opus 5.5 with our corrections to estimate compute for all the papers in our dataset.
+
+### Results
+
+- A typical AI safety paper used 81 H100e-hours; half of the papers used between 13 and 430. The median grew from 20 H100e-hours in 2020 to 135 in 2025, ×1.43 a year over the six years (table below).
+- Papers differ enormously: the standard deviation of the log of compute is about 2.65 every year (2.52–2.77). The top 1% of papers hold 67% of all compute and the top 10% hold 92%. The largest, at 70–280 H100e-years each, are mostly pretraining studies and large RL runs at Google, DeepMind, Meta, Anthropic with the UK AISI, Amazon and OpenAI.
+- Papers with an author at OpenAI, Anthropic or Google are 3.5% of the papers and hold 34% of the compute. Their median is 626 H100e-hours, against 78 for the others.
+- By topic, interpretability papers are the smallest (median 33 H100e-hours), then evaluations (64) and adversarial robustness (83); science of deep learning (187), jailbreaks (237), unlearning (237) and alignment experiments (335) are larger.
+- The papers of 2025 hold 2,895 H100e-years, half of the six years' total.
+- A quarter of the papers (5,679) state some run time, compute or cost. For half of the papers with compute, most of it is hours on a GPU the paper doesn't name, and for 18% it comes from FLOP.
+
+
+## The Dataset
+
+<figure className="result-table">
+<div className="result-table-scroll">
+<table>
+<thead>
+<tr><th scope="col" rowSpan={1}>Year</th><th scope="col">ML papers</th><th scope="col">AI safety papers</th><th scope="col">Share</th><th scope="col">In the dataset</th><th scope="col">Median compute, H100e-hours</th><th scope="col">Total compute, H100e-years</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">2020</th><td>54,254</td><td>2,539</td><td>4.7%</td><td>2,234</td><td>20</td><td>324</td></tr>
+<tr><th scope="row">2021</th><td>60,008</td><td>2,743</td><td>4.6%</td><td>2,426</td><td>41</td><td>394</td></tr>
+<tr><th scope="row">2022</th><td>65,232</td><td>3,140</td><td>4.8%</td><td>2,810</td><td>68</td><td>550</td></tr>
+<tr><th scope="row">2023</th><td>81,362</td><td>3,966</td><td>4.9%</td><td>3,628</td><td>76</td><td>455</td></tr>
+<tr><th scope="row">2024</th><td>105,292</td><td>5,706</td><td>5.4%</td><td>5,323</td><td>109</td><td>1,245</td></tr>
+<tr><th scope="row">2025</th><td>129,226</td><td>7,609</td><td>5.9%</td><td>7,260</td><td>135</td><td>2,895</td></tr>
+<tr><th scope="row">Total</th><td>495,374</td><td>25,703</td><td>5.2%</td><td>23,681</td><td>81</td><td>5,864</td></tr>
+</tbody>
+</table>
+</div>
+<figcaption>In the dataset: the AI safety papers except the 2,022 that ran only on CPUs. Compute: Opus 5.5's calibrated estimates with dead ends. The median is over the papers with computation of their own; the totals leave out the 248 papers without a value. Papers with an author at OpenAI, Anthropic or Google hold 34% of the total.</figcaption>
+</figure>
+
+For each paper the dataset holds its arXiv id, date, topic, title, authors, categories, journal reference, DOI, venue and citation counts from Semantic Scholar (23,615 papers found, October 2026), the authors' organizations and whether one of them works at OpenAI, Anthropic or Google, its compute with dead ends and the two figures behind it (the reported experiments and a stated whole-project figure), whether it states its compute, its main GPU, how the estimate was reached and, for the 740 test papers, the authors' own figure.
+
+To create the dataset, we spent \$3,107 on model calls at Batches API prices: \$819 to label the ML papers, \$642 for the test and its pilots, and \$1,645 to estimate every paper's compute.
+
+## Limitations
+
+In 2025, 401 relevant papers used no compute; 94% of them only made API calls. It's a bit unclear how to model them, so we made some reasonable choices and checked that they don't change our results much. For example, we count those papers for $n_s$ and $\alpha_v$, but not for $C_s$, and we don't use them to estimate the compute distribution $\sigma_c$.

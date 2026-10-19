@@ -1,0 +1,17 @@
+company,date,annualized_revenue_usd,revenue_type,confidence,source_type,source_url,report_date
+OpenAI,2023-03-01,200000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openais-losses-doubled-to-540-million-as-it-developed-chatgpt?rc=9mzoog,2023-05-04
+OpenAI,2023-08-29,1000000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openai-passes-1-billion-revenue-pace-as-big-companies-boost-ai-spending?rc=4ylmkj,2023-08-29
+OpenAI,2023-10-10,1300000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openais-revenue-crossed-1-3-billion-annualized-rate-ceo-tells-staff?rc=9mzoog,2023-10-12
+OpenAI,2023-12-30,1600000000,Annualized run rate,Confident,Media report,https://www.theinformation.com/articles/openais-annualized-revenue-tops-1-6-billion-as-customers-shrug-off-ceo-drama?rc=9mzoog,2023-12-30
+OpenAI,2023-12-31,2000000000,Annualized run rate,Likely,Media report,https://www.ft.com/content/81ac0e78-5b9b-43c2-b135-d11c47480119,2024-02-09
+OpenAI,2024-06-12,3400000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openais-annualized-revenue-doubles-to-3-4-billion-since-late-2023?rc=9mzoog,2024-06-12
+OpenAI,2024-08-15,3600000000,Annualized run rate,Likely,Media report,https://www.nytimes.com/2024/09/27/technology/openai-chatgpt-investors-funding.html,2024-09-27
+OpenAI,2024-09-12,4000000000,Annual recurring revenue (ARR),Likely,Media report,https://www.wsj.com/tech/ai/united-arab-emirates-fund-in-talks-to-invest-in-openai-fd4e4977?,2024-09-12
+OpenAI,2024-12-31,5500000000,Annual recurring revenue (ARR),Likely,Media report,https://www.cnbc.com/2025/06/09/openai-hits-10-billion-in-annualized-revenue-fueled-by-chatgpt-growth.html,2025-06-09
+OpenAI,2025-06-09,10000000000,Annual recurring revenue (ARR),Likely,Company disclosure,https://www.cnbc.com/2025/06/09/openai-hits-10-billion-in-annualized-revenue-fueled-by-chatgpt-growth.html,2025-06-09
+OpenAI,2025-07-30,12000000000,Annualized run rate,Confident,Company disclosure,https://www.cnbc.com/2025/08/20/openai-compute-ai.html,2025-07-30
+OpenAI,2025-08-01,13000000000,Annual recurring revenue (ARR),Likely,Media report,https://www.nytimes.com/2025/08/01/business/dealbook/openai-ai-mega-funding-deal.html,2025-08-01
+OpenAI,2025-12-18,19000000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openais-organizational-problems-hurt-chatgpt?rc=9mzoog,2025-12-18
+OpenAI,2025-12-31,21400000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openai-tops-25-billion-annualized-revenue-anthropic-narrows-gap?rc=9mzoog,2026-03-04
+OpenAI,2026-02-28,25000000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openai-tops-25-billion-annualized-revenue-anthropic-narrows-gap?rc=9mzoog,2026-03-05
+OpenAI,2026-08-13,40000000000,Annualized run rate,Likely,Media report,https://www.bloomberg.com/news/articles/2026-08-13/openai-s-revenue-run-rate-tops-40-billion-ahead-of-ipo,2026-08-13

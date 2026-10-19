@@ -1,0 +1,23 @@
+name,value,unit,p10,p90
+m_C,2.6,x,1.8,3.1
+m_L,3.2,x,1.8,4
+s_aut,0.05,share,,
+s_ext,0.38,share,0.10,0.45
+M,1.2,ratio,1.01,1.25
+C_safety_2025,27406,H100e,20000,35000
+L_safety_2025,5012,FTE,1900,8000
+RS_safety_2025,493,AIFM research units,,
+n_s,7260,papers,7200,10000
+kappa_h,0.02,ratio,0.007,0.1
+p_h,0.00614022667,FTE-years,0.002,0.05
+m_h,3,count,1,5
+zeta_p,0.27,exponent,0.21,0.35
+l_inf,1.5,ratio,1.1,3
+sigma_c,2.65,ln units,2.52,2.77
+alpha,1.45,exponent,1.35,1.8
+kappa_c,0.1,ratio,0.03,0.3
+kappa_p,0.003,ratio,0.0005,0.025
+p_p,0.00460517333,FTE-years,0.001,0.02
+w,0.9,share,0.7,0.99
+kappa_a,0.08,ratio,0.02,0.30
+N_a,20000,FTE,,

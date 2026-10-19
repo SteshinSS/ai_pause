@@ -1,0 +1,144 @@
+# COMPLETE Q2 2026 sampling config — BRENDAN's column of the elicitation sheet
+# (2026-08-08 revision: both uplift triples made log-symmetric on the sheet;
+# 10th cells adjusted, all three elicited quantiles reproduce exactly).
+#
+# Two-way AC-anchor mixture at the sheet's fractional weights:
+#     uplift-solved 0.65 / revenue 0.35   (time-horizon 0, ECI 0)
+#
+# Block vintages follow the sheet-wide "Present day" rows, expressed with the
+# per-observable reference dates; present_day (the simulation's "now") is the
+# newest vintage, matching the other Q2 configs. Time-horizon cells are blank
+# (weight 0): the shared Q2 horizon measurement (3.1 h at 2026.269178) is
+# stated for display/metric parity, the doubling-time and difficulty rows stay
+# inherited.
+#
+# Parent is the base config, which now carries the 2200 horizon, the
+# per-sample timeout and the canonical input series (input_data.csv) directly
+# — the former sampling_config_2200.yaml wrapper was folded into it.
+
+parent: "sampling_config.yaml"
+
+parameters:
+  # Mixture over the sheet's two weighted blocks.
+  ac_anchor_mode:
+    dist: choice
+    values: ["uplift-solved", "revenue"]
+    p: [0.65, 0.35]
+
+  # The simulation's "now" = the newest (uplift) vintage, per the Q2 sheet.
+  present_day:
+    dist: fixed
+    value: 2026.578082
+
+  # ------------------------------------------------------------------
+  # Uplift block (vintage 2026.578082, inherited uplift_reference_date)
+  # ------------------------------------------------------------------
+  # M*: 1.16/1.8/5 => excess 0.16/0.8/4.0, geomean(0.16, 4) = 0.8 exactly.
+  serial_uplift_at_reference_date:
+    dist: shifted_lognormal
+    ci80: [0.16, 4.0]
+    shift: 1.0
+    min: 1.01
+    max: 1000
+  # D: doubling time of the excess (M-1), months. 1.89/5.5/16:
+  # geomean(1.89, 16) = 5.4991 (exact to the sheet's 1.89 rounding).
+  excess_uplift_doubling_time:
+    dist: lognormal
+    ci80: [1.89, 16.0]
+    min: 0.6
+    max: 240
+  # Uplift-at-AC deliberately NOT sampled (reachable-floor infeasibility;
+  # see sampling_config_uplift_eli.yaml). L comes from the parent's
+  # automation_logistic_asymptote distribution.
+
+  # ------------------------------------------------------------------
+  # Taste block — conditioned on TastEval (tasteval.pzeroresearch.com,
+  # Aug 2026): reasoning-era frontier only (o1 -> Opus 5 max, 4.45-month
+  # ECM doubling), HIERARCHICAL error bars (incl. task resampling),
+  # shape-only likelihood (absolute level treated as uncalibrated — the
+  # 1.0x reference is an Opus 4.8 proxy, not a human). Posterior computed
+  # analytically by reweighting prior draws; see memory note
+  # tasteval-conditioning. Do not condition on TastEval (or derivatives
+  # of the same runs) again downstream — that would double-count.
+  # ------------------------------------------------------------------
+  # Posterior q10/q50/q90 = 1.16/2.69/5.74 (prior was ci80 [0.7, 6.3])
+  ai_research_taste_slope:
+    dist: lognormal
+    ci80: [1.25, 5.8]
+    min: 0.1
+    max: 10
+  # Posterior q10/q50/q90 of (m2t - 1) = 1.01/3.29/11.17 (prior [0.7, 10.4])
+  median_to_top_taste_multiplier:
+    dist: shifted_lognormal
+    ci80: [1.0, 11.2]
+    shift: 1.0
+    min: 1.01
+    max: 100
+
+  # ------------------------------------------------------------------
+  # Time-horizon block: weight 0, cells blank. Shared Q2 measurement stated
+  # for horizon-metric parity with the other Q2 configs; belief rows inherited.
+  # ------------------------------------------------------------------
+  horizon_reference_date:
+    dist: fixed
+    value: 2026.269178
+  present_horizon:
+    dist: fixed
+    value: 186.0
+
+  # ------------------------------------------------------------------
+  # Revenue block (vintage 2026.374429) — dollars, not the sheet's trillions
+  # ------------------------------------------------------------------
+  revenue_reference_date:
+    dist: fixed
+    value: 2026.374429
+  present_revenue:
+    dist: fixed
+    value: 4.7e10           # $0.047T annualized at the revenue vintage (50th only)
+  present_revenue_growth_rate:
+    dist: lognormal
+    ci80: [3.5, 14.0]       # growth FACTOR/yr, 3.5/7/14, geomean 7 exactly
+    min: 1.01
+    max: 100
+  revenue_required_for_ac:
+    dist: lognormal
+    ci80: [3.0e11, 3.0e13]  # $0.3T / $30T, median $3T exactly
+    # FLOOR (same rationale as the other Q2 configs): AC revenue must exceed
+    # what the leading company can already have by present_day under ANY
+    # growth draw — 4.7e10 x 14^(2026.578082-2026.374429) ~ 8.06e10; 8.1e10
+    # used. Prevents sub-anchor tail draws from dating AC in the past.
+    min: 8.1e10
+    max: 1e16
+    clip_to_bounds: true    # spec min/max only bind when this is explicit
+
+# Full override of the parent matrix (child matrices replace, not merge):
+# identical to sampling_config.yaml's, plus a 10th row/column for
+# median_to_top_taste_multiplier carrying the TastEval-induced -0.40
+# dependence with ai_research_taste_slope (the evidence pins the product
+# sigma*slope, so the components anti-correlate in the posterior; without
+# this the slow tails of calendar-time outputs inflate). Min eigenvalue
+# of the extended matrix: 0.155 (PSD).
+correlation_matrix:
+  parameters:
+    - "present_doubling_time"
+    - "doubling_difficulty_growth_factor"
+    - "ai_research_taste_slope"
+    - "ai_research_taste_at_coding_automation_anchor_sd"
+    - "gap_years"
+    - "ac_time_horizon_minutes"
+    - "coding_automation_efficiency_slope"
+    - "inv_compute_anchor_exp_cap"
+    - "inf_compute_asymptote"
+    - "median_to_top_taste_multiplier"
+  correlation_matrix:
+    - [ 1.00,  0.60, -0.30,  0.00,  0.00,  0.00, -0.15,  0.00,  0.00,  0.00] # present_doubling_time
+    - [ 0.60,  1.00, -0.30,  0.00,  0.30, -0.50, -0.10,  0.00,  0.00,  0.00] # doubling_difficulty_growth_factor
+    - [-0.30, -0.30,  1.00,  0.30,  0.00,  0.00,  0.00,  0.00,  0.00, -0.40] # ai_research_taste_slope
+    - [ 0.00,  0.00,  0.30,  1.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00] # ai_research_taste_at_coding_automation_anchor_sd
+    - [ 0.00,  0.30,  0.00,  0.00,  1.00,  0.00,  0.00,  0.00,  0.00,  0.00] # gap_years
+    - [ 0.00, -0.50,  0.00,  0.00,  0.00,  1.00,  0.00,  0.00,  0.00,  0.00] # ac_time_horizon_minutes
+    - [-0.15, -0.10,  0.00,  0.00,  0.00,  0.00,  1.00,  0.00,  0.00,  0.00] # coding_automation_efficiency_slope
+    - [ 0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  1.00,  0.50,  0.00] # inv_compute_anchor_exp_cap (marginal behavior)
+    - [ 0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.50,  1.00,  0.00] # inf_compute_asymptote (C_inf)
+    - [ 0.00,  0.00, -0.40,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  1.00] # median_to_top_taste_multiplier (TastEval-induced)
+  correlation_type: "spearman"

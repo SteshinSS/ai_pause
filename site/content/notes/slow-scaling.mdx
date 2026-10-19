@@ -1,0 +1,51 @@
+---
+title: Capability Scaling Strategy
+---
+
+AI 2040 [proposes](https://ai-2040.com/supplements/capability-scaling-strategy) to scale AI up to the max-controllable AI, which it guesses is roughly TED-AI, and then to slow down nearly to a halt [@lifland2026scaling]. How fast should we scale? 
+- If you scale slowly:
+  - Less risk of AI takeover. It's hard to say where exactly the max-controllable AI is, so moving carefully lets you evaluate models better.
+  - Less algorithmic progress. We can improve capabilities $E(t)$ using either more compute $C(t)$ or better algorithms $S(t)$. It's much easier to control compute, because the GPU supply chain is so complex and concentrated. Algorithmic progress is difficult to control and likely to leak to uncontrollable illegal actors.
+  - More time to prepare. Work on other risks, such as preventing concentration of power by lab CEOs or hardening the world, can benefit from more time.
+- If you scale fast:
+  - You have more time with smarter AI. It's important if you expect the pause to finish soon.
+
+Our model allows us to price the AI safety research you lose with slow scaling. Imagine two scenarios:
+- **Full Speed**. Labs race from <Milestone>AC</Milestone> (05.2028) to <Milestone>TED-AI</Milestone> (10.2029),[^whyted] then the pause begins. It ends $k$ years later, when the labs hand off to the AI.
+- **Plan A**. The pause starts earlier, at <Milestone>AC</Milestone>, but its first years are dedicated to careful scaling. The labs reach TED-AI $L$ years after the Full Speed labs and only then start researching AI safety.
+
+The Plan A labs miss the Full Speed labs' first $L$ years at TED-AI, so they have to hand off later to do as much safety research. How much later? Call this the handoff delay $\Delta t$.
+
+## An Upper Bound
+
+To simplify the model, we assume the worst: the Plan A labs do no safety research at all before TED-AI. This gives an upper bound on how bad slow scaling is.
+
+After reaching TED-AI, the Plan A and Full Speed labs are the same. They use the same AI and have the same staff and the same compute. So in any year after the Plan A labs reach TED-AI, both do the same research. Let $C(d)$ be the AI safety research done in the first $d$ years at TED-AI, counted from the Full Speed labs' arrival. When the Full Speed labs hand off, they have done $C(k)$. The Plan A labs, which missed the first $L$ years, catch up $\Delta t$ later:
+
+$$
+C(k + \Delta t) - C(L) = C(k)
+$$
+
+Because of hardware progress, labs do more and more AI safety research each year. The years the Plan A labs miss are the first ones, when a year holds the least research, and they make them up at the end, when a year holds the most. So the longer the Full Speed labs' pause, the shorter $\Delta t$. For the same reason, if both hand off on the same date, the Plan A labs lack only the share $C(L) / C(k)$ of the Full Speed labs' AI safety research, the shaded end below.
+
+<SlowScaling example />
+
+We model five Plan A options, reaching TED-AI 1–5 years after the Full Speed labs.
+
+<SlowScaling>
+<span data-axis>Handoff delay $\Delta t$, years</span>
+<span data-x>Full Speed labs' years at TED-AI, $k$</span>
+
+A line per delay $L$, each starting at its delay: Full Speed labs that hand off as soon as they reach TED-AI are $L$ years ahead. In both scenarios, the labs have the TED-AI staff (frozen hiring).
+
+</SlowScaling>
+
+## Results
+
+In AI 2040's Plan A, the Consortium scales AI carefully for the first five years and then has five years at TED-AI. Our timelines are a bit earlier, because we use the AIFM preset, but we can still model a similar scenario. With Workload Approval, Plan A's scaling seems to produce as much AI safety research as if the Consortium had rushed to TED-AI and then researched there for 7.4 years. In calendar time, Plan A would hand off 1.27 years later, but it might also require an earlier pause, to control the scaling from AC on.
+
+This is an upper bound on how bad Plan A's scaling is, because we assume no AI safety research during the first five years of careful scaling. We think that, if we also counted the AI safety research done during the scaling, Plan A would hand off only 0.4 years later.[^upper]
+
+[^whyted]: We use the TED-AI milestone because AI 2040 thinks it could be near the max-controllable AI. We don't discuss where the line is. It should be estimated carefully and transparently.
+
+[^upper]: We asked Claude to build the exact model, and it reported that in reality $\Delta t$ is about a third as large. We didn't verify it, so we report the upper bound only.

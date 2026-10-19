@@ -1,0 +1,517 @@
+---
+title: AI Pause Model Explanations
+symbols: true
+---
+
+Open it side by side with the [formulas](note:model).
+
+During a pause, AI can produce a lot of work, but humans will likely need to check it. We don't know exactly what they will check, so we describe four verification protocols. Each protocol builds on the previous one by adding a new verification mechanism.
+
+<nav className="toc">
+
+Contents
+
+1. [Full Trust](#full-trust)
+2. [Results Verification](#results-verification)
+3. [Compartmentalization](#compartmentalization)
+4. [Workload Approval](#workload-approval)
+
+- [Sensitivity Analysis](#sensitivity-analysis)
+- [Capability Scaling Strategy](#capability-scaling-strategy)
+- [Extend the Model](#extend-the-model)
+
+</nav>
+
+# Full Trust
+
+We build on the AI Futures Model (AIFM) [@lifland2025aifm]. It's a takeoff model that captures many factors of AI R&D progress. At its core is a semi-endogenous growth model [@jones1995rd; @bloom2020ideas], which assumes that ideas get harder to find, so progress needs more research input. It's inspired by Davidson's Full Takeoff Model [@davidson2023takeoff] and Epoch's GATE model [@erdil2025gate].
+
+With small modifications, we can turn it into an AI pause model with full trust, where no humans verify the AI's work. Here we describe our Full Trust modification and briefly recap the original model, but we assume the reader has already studied the [AIFM](https://www.aifuturesmodel.com/) site and maybe even its [Supplementary Materials](https://docs.google.com/document/d/1ru6Okbxb6XuH18Cz8439sdQJazMV39hNxsWDokh97r0/edit?tab=t.0#heading=h.qaz4ru2yoi5b).[^version]
+
+## Protocol
+
+An international deal, domestic regulation or self-pacing leads to an AI pause. OpenAI, Anthropic and Google DeepMind stop capabilities research and instead do AI R&D that improves our understanding of AI rather than its capabilities.
+
+In the Full Trust model, we count all research and don't model human verification.
+
+## Effective Compute
+
+AIFM measures AI capability with effective compute $E(t)$. The more compute $C_{train}(t)$ has been spent on training the frontier model, and the better the training algorithms $S(t)$ were when it was spent, the higher $E(t)$.
+
+During a pause, frontier training stops, so $E$ stays frozen at $E_p$.
+
+## Merged Labs
+
+AIFM models only the leading AI lab. In an AI pause, OpenAI, Anthropic and Google DeepMind merge. This could come from:
+- An international deal à la [AI 2040](https://ai-2040.com/) making everybody cooperate, including the top three US labs.
+- Domestic regulations making US labs cooperate [@lifland2026pace], or some kind of merged Manhattan Project [@brundage2024cern].
+- Self-pacing AI labs cooperating by sharing their AI safety research [@bowman2025pilot].
+
+Adding xAI and Meta, or Chinese labs, would bring even more resources and so more years of 2025 AI safety work. Here we model only the three labs together. They don't need to actually merge: it's enough for them to see each other's research results, so they don't duplicate work. There will still be some diminishing returns and stepping on toes, but AIFM already models these inside one lab.
+
+The merged labs have $m_C$ times the compute and $m_L$ times the staff of AIFM's leading lab. Their compute keeps growing along AIFM's path, while their staff stay as they were at the start of the pause.[^staff]
+
+## Compute Shares
+
+There are four shares of compute in AIFM:
+- training frontier models
+- research experiments
+- AI coders
+- external deployment
+
+In a pause, training stops. External deployment compute is frozen (see [rationale](note:parameters)). AI coders keep their AIFM share. Experiments get the rest.
+
+## Experiment Throughput
+
+To run experiments, the labs need both compute and coding labor.
+
+### Coding Labor
+
+Let's index coding tasks by $i$ from 0 to 1. Depending on AI capabilities, both humans and AI coders can work on a task, together amounting to $G_i$ person-equivalents on task $i$: $L_{H,i}$ humans plus AI coders using $C_{aut,i}$ of compute, each unit of compute worth $\eta_i$ people. $\eta_i$ is zero if the AI can't do the task at all and grows with AI capabilities.
+
+Tasks complement each other ($\rho_C \lt 0$). The labs allocate people and AI optimally. In practice, the AI takes the tasks it's most efficient at, and humans do the rest.
+
+#### Automation
+
+The AI can do tasks $i$ from $0$ to $A(E)$. This automation fraction grows as a sigmoid in $\log E$. Task $i$ becomes automatable at $E_i$, and when the AI can do every task, that marks the arrival of the Automated Coder (<Milestone>AC</Milestone>).[^tail] Once a task is automated, AI coders on it keep getting more efficient: each order of magnitude of $E$ adds $\eta_{slope}$ orders of magnitude to their efficiency $\eta_i$, starting from $\eta_{init}$.
+
+### Experiment Throughput
+
+$X$ is the main object in all our models. We keep AIFM's name, experiment throughput, but it could also be called research volume, quality-unadjusted research effort or research work. We call it research for short.
+
+$X$ is how much research the labs get done in a year: their experiments, weighted by the compute they use and the coding they take. It combines experiment compute $C_{xpm}$ and coding labor $L_C$, each with diminishing returns. $\lambda \lt 1$ is the penalty for working in parallel: twice the coders don't code twice as fast.
+
+
+
+## Research Taste
+
+Some research is more valuable than other research, and people differ in how well they pick it. AIFM models this with research taste: a researcher with taste 2 produces work worth twice as much as one with taste 1.
+
+The AIFM authors model human taste as lognormal (see [rationale](https://docs.google.com/document/d/1ru6Okbxb6XuH18Cz8439sdQJazMV39hNxsWDokh97r0/edit?tab=t.0#heading=h.k53tugksut89)) and the AI's taste as improving with $\log E$ (see [rationale](https://docs.google.com/document/d/1ru6Okbxb6XuH18Cz8439sdQJazMV39hNxsWDokh97r0/edit?tab=t.0#heading=h.y0yy6iou4a4q)).
+
+When the AI's research taste surpasses a researcher's, that researcher defers planning and analysis to it, so each researcher works with the larger of their own taste and the AI's. In a pause, $E$ stays at $E_p$, so the AI's taste stays where it was when the pause began.
+
+Originally, the AIFM authors estimated the taste slope for capabilities R&D. We model [computational AI safety research](note:aisafety-papers), which in practice looks very similar to capabilities research. We think that, by default, AI will be trained in environments that benefit both types of AI R&D similarly. That's why we keep AIFM's parameters.
+
+## Research Effort
+
+Research effort is taste-adjusted $X$. When the AI surpasses a researcher in research taste, we count it as if that researcher did more work, in proportion to the AI's taste.
+
+## Research Stock
+
+The research stock $RS$ is all the research effort done so far. In AIFM, it loops back to software efficiency: every $\beta$ doublings of the stock double $S$, since ideas get harder to find.
+
+In a semi-endogenous growth model, $S(t)$ is a kind of final output. In AIFM, it is software efficiency; in semiconductor research, it could be transistor density [@bloom2020ideas]. In AI safety, the real output is hard to measure: "reducing the risks of AI takeover and misuse" or "improving our understanding of intelligence". Although these are the outputs we actually care about, we can neither measure nor model them, so we model AI safety work instead.
+
+Safety work is not an ideal proxy for risk reduction because of diminishing returns. A thousand years of AI safety work won't reduce risk a thousand times as much as the 2025 safety research did. Still, if we decide to continue training AI, we think more safety work reduces risk monotonically.[^keepscaling]
+
+## Results
+
+See how we estimated the input [parameters](note:parameters).
+
+We accumulate $RE$ over the pause and divide it by $RS_s$, a year of the 2025 AI safety field's work. See how we estimated [2025 AI safety work $RS_s$](note:safety2025).
+
+# Results Verification
+
+Results Verification is the [Full Trust](#full-trust) model with the changes described in all the subsections below.
+
+## Protocol
+
+Full Trust basically counts all the AI-generated research. In practice, if we have an AI pause, we won't fully trust AI. And we shouldn't:
+- It may reward-hack and oversell bad results.
+- If AI is scheming, it might sabotage our research to avoid being detected [@benton2024sabotage; @gasteiger2025sandbag; @kirk2026sabotage]. For example, it could avoid making lie detectors that work.
+- AI might explore red-teaming, jailbreaking and control research to tamper with our monitors [@roger2024tampering].
+- AI can poison our datasets or training techniques to make the next generations of AI aligned with it rather than with humans [@cloud2025subliminal; @souly2025poisoning; @kwon2026loyalties].
+
+From now on, we stop taking what AI does on faith and add verification protocols. In Results Verification, we count only research that was verified by humans.
+
+AIs still do the research and run many experiments autonomously. Some of them fail, but the rest are written up as papers with code. Human verifiers check the most important papers first. Each paper gets $m_h$ verifiers: they read it, review or re-implement the code, and re-run the main experiments once. Only papers that were checked and reproduced count. We call their research effort verified research effort, $RE^v$. It requires both compute for reproduction and human time for verification.
+
+Before <Milestone>AC</Milestone>, people do research much as in 2025, so we count <Milestone>pre-AC</Milestone> research the same way, without extra checks, and the <Milestone>pre-AC</Milestone> row equals the Full Trust one. From <Milestone>AC</Milestone> on, the AI codes on its own and experiments run without people, so we check them: Results Verification is for the <Milestone>AC</Milestone>, <Milestone>SAR</Milestone> and <Milestone>TED-AI</Milestone> rows.
+
+Once the AI researches on its own, verifiers can become the bottleneck: the AI may write papers faster than the staff can check them. So we compute two versions:
+- By default, the labs keep the staff they had at the start of the pause, so verifiers can become the bottleneck.
+- Alternatively, we check what would happen if labs could hire as many verifiers as they need.
+
+Usually, researchers are rewarded for discoveries, but here AI does nearly all the science. So we recommend rewarding verifiers for finding mistakes in AI work.
+
+We note that Results Verification is hardly a safety measure, as allowing millions of misaligned AI Einsteins to run autonomously might cause catastrophes.
+
+
+## Splits
+
+The labs split their experiment compute into exploration compute $C_e$ for the AI's own experiments and reproduction compute $C_r$ for verification.
+
+They split their staff into the $N_e$ people with the best research taste, who keep researching, and $N_v$ verifiers.
+
+## Research
+
+The labs research exactly as in Full Trust, only with less compute and fewer people: $X_e$ is AIFM's $X$ of the exploration compute and of the coding labor of the $N_e$ researchers and the AI coders.
+
+### Taste
+
+We changed the formula for taste. It equals AIFM's formula everywhere except in Results Verification at <Milestone>AC</Milestone>, where it fixes an unrealistic behavior. Skip the details on a first reading.
+
+<Derivation id="rv-taste" label="Details">
+
+AIFM's taste has a peculiar implication after <Milestone>AC</Milestone> but before <Milestone>SAR</Milestone>. From <Milestone>AC</Milestone> on, there is so much coding labor that you could remove almost all of the humans without changing $X$. But taste doesn't depend on the number of humans, so the taste distribution stays the same. That's not realistic: if there are no humans to lead research, they can't contribute their taste.
+
+- It doesn't matter before <Milestone>AC</Milestone>: you need people for $L_C$.
+- It doesn't matter from <Milestone>SAR</Milestone> on: AI dominates taste.
+- Between <Milestone>AC</Milestone> and <Milestone>SAR</Milestone>, it doesn't matter for AIFM or Full Trust: the labs still have a lot of people.
+
+But when we add verification, we need to find the optimal allocation of humans between research and verification. Naively, AIFM's taste makes it optimal to send almost everyone to verification, since that doesn't affect taste.
+
+This affects only Results Verification at <Milestone>AC</Milestone>. That's why we changed the taste model. In other regimes, it's equal to AIFM's taste.
+
+We send the researchers with the worst research taste to verification, and the AI chooses their share of the research with its own taste. On the one hand, this raises the average taste of the remaining human researchers; on the other, it reduces their share. We choose the allocation optimally.
+
+</Derivation>
+
+## Verified Research
+
+As in Full Trust, the labs' research effort $RE_e$ is their research $X_e$ adjusted for taste. Humans verify the share $\varphi_h$ of it. Verification costs two resources:
+- Verifier labor, limited by the number of verifiers. They check the papers worth the most first.
+- Reproduction compute. Every checked paper must be re-run, so the labs set aside exactly enough compute to re-run what the verifiers check.
+
+To get $\varphi_h$, we need two things: how many papers there are, and how the research effort is spread across them.
+
+## Papers
+
+In AIFM, there's an amorphous mass of experimental work, $X$. In reality, humans verify research in pieces, so we need a way to cut $X$ into verifiable pieces. We call such a piece a paper.
+
+A paper here isn't an academic publication. It's a piece of the labs' research that takes a fixed amount of human labor to verify, apart from studying its prerequisites. It's similar to how human researchers might decide to split a big paper into several smaller ones. With this definition, we don't need to think about how different research changes the verification labor.[^paper]
+
+Each year, the labs write $n(t)$ papers. Paper $i$ used compute $c_i$, dead ends included, and coding labor $l_i$. Its research $r_i$ is how much research went into it, whatever its idea. Later, we introduce the quality of its idea, $v_i$.
+
+A paper is made of compute and labor, like the labs' total research, so we model its research $r_i$ with a similar CES function. In such a CES, compute and labor are poor substitutes: you can't replace much compute with labor, so each input alone can raise research only up to a ceiling. A paper's labor ceiling, $l_\infty$, says how many times more research a paper holds with all the labor it can use than a 2025 paper with the same compute.
+
+From <Milestone>AC</Milestone> on, the labs have far more coding labor per paper than the 2025 field had, so we assume every paper has all the labor it can use. The CES collapses to $r_i = r_s l_\infty (c_i / \bar c_s)^{\zeta_p}$. The extra labor buys careful baselines, no bugs, no broken runs. It can't buy more claims or more code to review, because we fix the verification time of a paper. More claims and more code go to more papers.
+
+### Paper Compute
+
+A paper with more compute holds more research: more models, more random seeds, more ablations. But returns diminish, as they do for $X$: ten times the compute gives a paper $10^{\zeta_p}$ times as much research.
+
+We also account for wasted compute:
+- There are failed experiments inside a paper. A paper describes only the successful experiments, but in reality it took more compute. Whenever we mention a paper's compute, we mean compute that includes these dead ends. For example, the compute of papers in the [AI safety papers dataset](note:aisafety-papers) already includes them.
+- There are failed projects that were abandoned and never published. Still, they eat some of $C_e$, as they ate some of the 2025 AI safety compute, $C_s$. We account for them with the coefficient $M$.
+
+Paper compute is lognormal: its logarithm has standard deviation $\sigma_c$, and its mean is the year's average $\bar c$. Together, a year's papers make up the labs' research $X_e$ and, with the failed projects, use their exploration compute $C_e$.
+
+## Review Work
+
+Let $\tau$ be one verifier's time to check a paper. It consists of two parts:
+- reading it, reviewing or re-implementing the code, and checking the re-run;
+- reading the prerequisites, if the verifier missed some of them.
+
+We express the first part through the 2025 AI safety field. We estimate how much FTE time it took to write a paper, $t_s$, and how much faster it is to verify a paper than to write it, $\kappa_h$.
+
+But the field is growing quickly, proportionally to $n(t)$, so verifiers likely won't know all the prerequisites, and we need to account for the time to read them. The prerequisites are likely already verified, since they are important enough to be built upon. But a specific verifier might not have read them.
+
+We tried to model this with random graphs, but ended up with a simple approximation instead. The time grows proportionally to the logarithm of $n(t) / n_s$, so each time the field grows 10x, it takes $p_h$ more FTE-years to verify a paper. We used our model and intuition to fit $p_h$, but we aren't sure of it, so we use wide confidence intervals, and we chose a rather small $p_h$ to make our model more conservative and boring.
+
+Checking the labs' $n$ papers a year, $m_h$ times each, takes $W = m_h n \tau$ FTE-years every year. So $W$ is in FTE: the number of verifiers the labs need, working full time. Written with $\kappa_h$ and $p_h$, it needs $n / n_s$, how many times more papers the labs write than the 2025 field did, and the 2025 field's own count $n_s$, which sets $t_s$.
+
+## Paper Count
+
+A year's papers have to satisfy two sums at once: their research adds up to $X_e$, and their compute adds up to $C_e$. Together, they give $n / n_s$.
+
+Start with research. The labs do $k_X$ times the 2025 field's research, which is how many times more papers they write, $n / n_s$, times how much more research each one carries: $l_\infty$ times more for its labor, and $(\bar c / \bar c_s)^{\zeta_p}$ times more for its compute.
+
+Now compute. The average compute per paper is the compute divided by $M$ and by the count, for the labs and for the 2025 field, whose compute also holds its failed projects. $M$ cancels, which gives the paper count in terms of $k_X$ and $k_C$.
+
+What this says:
+- More research at the same compute (more staff, or more automation) means more papers, more than in proportion: each paper gets less compute, so it carries less research.
+- More compute at the same research means fewer, bigger papers.
+- When compute grows faster than research, as it does through most of a pause, compute per paper and research per paper both rise, but research per paper rises more slowly.
+- The more research a paper gains from labor, $l_\infty$, the fewer and bigger the papers. With $l_\infty = 1$, labor makes more papers, not bigger ones.
+- With $\zeta_p = 0$, compute doesn't matter, and the number of papers grows exactly with research.
+
+## Reviewer Budget
+
+With $N_v$ verifiers, the labs check the share $q = N_v / W$ of the $n$ papers. This is not a random sample: if verifiers are the bottleneck, we want to check the papers with the most research effort $RE_i$.
+
+We already said that each paper $i$ holds research $r_i$ of $X_e$. In a single year, $r_i$ depends only on its compute $c_i$, which is lognormally distributed with $\sigma_c$. We model another characteristic of papers, the quality of their ideas, $v_i$. It doesn't affect the raw research $X_e$, but it affects the research effort $RE_i$, adjusted for idea quality and taste. Think of the transformer paper: it isn't great because of the compute or labor behind it.
+
+Idea quality works like taste. Taste $T$ says what a unit of the labs' research is worth on average, and idea quality says how this paper compares with that average. So a paper's research effort is $RE_i = T v_i r_i$: its research, weighted by the labs' taste and by the quality of its idea. We model $v_i$ with a Pareto distribution [@sinatra2016quantifying; @janosov2020success].
+
+## Top Papers
+
+Verifiers take the papers with the most research effort $RE_i$ first, so they cover the share $\varphi_h(q)$ of the research effort $RE_e$ and hold the share $\psi(q)$ of the exploration compute $C_e$.
+
+A paper's research effort $RE_i$ is a function of two random variables, $v_i$ and $c_i$. So it is a random variable itself, and we can derive closed-form formulas for both shares.
+
+**A paper's research effort.** Idea quality is Pareto, so its logarithm is exponential. Compute is lognormal, so its logarithm is normal. Hence $\ln RE_i$ is a constant plus two independent terms: an exponential with mean $1 / \alpha_v$, from the idea, and a normal with standard deviation $\sigma_y = \zeta_p \sigma_c$, from compute. The constant is $\ln K$, where $K$ is what a paper with the weakest idea and the median compute is worth.
+
+<Derivation id="top-papers-research">
+
+1. Idea quality exceeds $v$ with chance $(v_m / v)^{\alpha_v}$, the chance that an exponential $\varepsilon_i$ with mean 1 exceeds $\alpha_v \ln (v / v_m)$.
+2. Compute is lognormal around its median $\tilde c$. Its mean, $\bar c$, is $e^{\sigma_c^2 / 2}$ times larger.
+3. Put both into $RE_i = T v_i r_i$, with $r_i$ from (24).
+
+</Derivation>
+
+**Shares.** The verifiers check the papers above a bar, $u$ in logarithms above $K$. $G(x, a)$ is the share of papers above the bar $x$ when the exponential term has rate $a$. So $q = G(u, \alpha_v)$: the reviewer budget sets $q$, and $q$ sets the bar. The first term of $G$ counts the papers whose compute alone clears the bar; the second counts those that clear it thanks to their idea.
+
+$\psi$ and $\varphi_h$ count the same papers, but weight each by its compute or by its research effort. Both weights change the distribution in a simple way. Weighting a normal draw $\xi_i$ by $e^{\delta \xi_i}$ moves it up by $\delta$, and weighting idea quality by itself lowers its tail from $\alpha_v$ to $\alpha_v - 1$.
+- Compute weights move $\xi_i$ up by $\sigma_c$, which raises $\ln RE_i$ by $\sigma_y \sigma_c$. That's the same as lowering the bar by as much.
+- Research-effort weights move $\xi_i$ up by $\sigma_y$ and fatten the tail of idea quality. So the checked papers hold more of the research effort than of the papers, and the closer $\alpha_v$ is to 1, the more.
+
+<Derivation id="top-papers-closed">
+
+1. The shares are (31) written as averages over the papers: what the checked papers hold, divided by what all the papers hold.
+2. A paper with $\sigma_y \xi_i \ge x$ clears the bar with any idea. Otherwise it needs $\varepsilon_i / a \ge x - \sigma_y \xi_i$, which has chance $e^{-a (x - \sigma_y \xi_i)}$.
+3. Weighting the normal draws by $e^{\delta \xi_i - \delta^2 / 2}$, which averages 1, is the same as moving them up by $\delta$. Completing the square in the normal density shows it. With $\delta = a \sigma_y$, it turns the average chance of the papers below the bar into the second term of $G$.
+4. The Pareto density times $v$, whose mean is 1, is the Pareto density with the same floor and tail $\alpha_v - 1$.
+5. Compute and research effort, each divided by its average, are such weights: $\delta = \sigma_c$ for compute; for research effort, $\delta = \sigma_y$, times idea quality, which is independent of compute. Moving $\xi_i$ up by $\delta$ raises $\sigma_y \xi_i$ by $\sigma_y \delta$, the same as lowering the bar by as much.
+
+</Derivation>
+
+## Compute Budget
+
+Verifiers reproduce the main experiments with the compute $C_r$. Since they can skip ablations, random seeds and failed experiments, a re-run takes only the share $\kappa_c$ of a paper's compute $c_i$. Above, we spread the failed projects across all the papers, but humans don't need to reproduce them, so a re-run takes $\kappa_c c_i$, not $\kappa_c M c_i$. This lets us express $C_e$ through all of the experiment compute, $C_{xpm}$.
+
+But $\psi$ itself depends on $C_e$[^psi]. So (34) is one equation in one unknown, $C_e$, and we solve it numerically by bisection. The answer lies between two bounds:
+- If every paper is checked, $\psi = 1$, and the labs explore with $C_{xpm} / (1 + \kappa_c / M)$.
+- If no paper is checked, the labs explore with all of $C_{xpm}$.
+
+We try the midpoint, compute $X_e$, $n$, $q$ and $\psi$ there, and check whether exploration plus re-runs fit in $C_{xpm}$. If they don't, the answer lies below the midpoint; otherwise, above. The labs solve this for every split of their staff they consider and then pick the best split (35).
+
+## Best Split
+
+We allocate humans between research and verification optimally: the labs pick the split with the most verified research effort, $RE^v$.
+
+## Unlimited Hiring
+
+Verifiers might become a bottleneck, so we also model an unlimited hiring trajectory. We assume all papers are verified: $\varphi_h = \psi = 1$ and $RE^v = RE_e$. For <Milestone>SAR</Milestone> and <Milestone>TED-AI</Milestone>, all the researchers move to verification, and we hire the rest. <Milestone>AC</Milestone> is a little trickier: we model it as an optimal allocation of the existing staff between verification and research and hire the remaining verifiers.
+
+## Table
+
+See how we estimated the input [parameters](note:parameters).
+
+In our model, verifications are mostly successful. AI is selected to do useful AI R&D work. And even if it produces something unreproducible, 2025 $X_s$ research also had unreproducible results, and it's not clear that AI will make their share bigger.
+
+## Limitations
+
+Because of necessary simplifications, our model corresponds to a slightly different protocol.
+
+- In our model, humans verify the most important papers of the year. In reality, research arrives over the year, so at the start of the year they can't know which papers will be the year's best. We think this isn't numerically important. To check it, we additionally modeled the worst case, in which verifiers can't tell anything about the papers' importance and sample them at random. See [Random Checks](note:random-checks).
+
+# Compartmentalization
+
+Compartmentalization is the [Results Verification](#results-verification) model with the changes described in all the subsections below.
+
+## Protocol
+
+We keep Results Verification and add more verification. It's common to split human staff into researchers who plan experiments and engineers who write the code. We use the same split between a smarter model and a weaker one to contain the smarter model and limit its attack surface[^researchers-engineers]:
+- The AI researcher is the frontier model, at <Milestone>SAR</Milestone> level or above. It's sandboxed: it can talk to the staff and read the library, but it can't run anything.
+- The AI engineer is a model at <Milestone>AC</Milestone> level, the weakest one that can do all the coding on its own. It implements and runs the researcher's plans.
+- The human staff no longer research on their own. They lead projects with the researcher or verify papers.
+
+<Flow label="Who reads, writes and runs what in a round of compartmentalized research">
+<div data-node="lead" data-to="plan"><span className="flow-label">Project lead</span>Human: approves the plan</div>
+<div data-node="researcher" data-to="plan"><span className="flow-label">AI researcher</span><Milestone>SAR</Milestone> or above: reads, runs nothing</div>
+<div data-node="plan" data-to="engineer" className="flow-wide"><span className="flow-label">High-level plan</span>Experiment description and what to report</div>
+<div data-node="engineer" data-to="store report" className="flow-wide"><span className="flow-label">AI engineer</span><Milestone>AC</Milestone> level: writes the code and runs it</div>
+<div data-node="store" data-to="verifiers"><span className="flow-label">Store</span>Code, logs and data</div>
+<div data-node="report" data-to="library"><span className="flow-label">Report</span>The planned graphs and metrics</div>
+<div />
+<div data-node="library" data-to="researcher verifiers"><span className="flow-label">Library</span>Plans, reports and papers</div>
+<div data-node="verifiers" className="flow-wide flow-out"><span className="flow-label">Verifiers</span>Humans: check the best papers against the code and data, and re-run them</div>
+<figcaption>The dashed arrow is the next round. Only the verifiers read the store.</figcaption>
+</Flow>
+
+A human project lead discusses ideas with the AI researcher, and the researcher writes a plan: what experiments to run and what to report[^plan]. The lead reads the plan and approves it, and the AI engineer writes the code and runs it. The preregistered graphs and metrics go into a report, which is saved to the library. The code, logs and data go to a separate store that only human verifiers read[^threat]. Then the lead and the AI researcher choose to either:
+- drop the failed project,
+- turn it into a paper,
+- or do another round of planning and experimenting.
+
+When a paper is ready, nobody has read its code yet. So papers are verified exactly as in Results Verification, and the staff split their time between two jobs: leading rounds and checking papers.
+
+Compared with Results Verification, the labs can lose research effort $RE$ in four ways:
+- The AI engineer codes at <Milestone>AC</Milestone> level, far below the frontier model.
+- A plan carries only part of the AI researcher's taste, because the engineer makes implementation choices inside it.
+- Every round takes some of the lead's time, so less is left for verifying.
+- Only approved plans run, so compute sits idle when the staff haven't planned enough rounds.
+
+Compartmentalization is for the <Milestone>SAR</Milestone> and <Milestone>TED-AI</Milestone> rows; the earlier rows are the Results Verification ones. As there, we compute two versions: with the staff the labs had at the start of the pause, and with unlimited hiring of leads and verifiers.
+
+It's a pretty standard idea in the AI safety community, discussed as AI oracles or AI boxing. Here are some papers with similar protocols:
+- ACL-5 level in @korbak2025control. The authors argue that no control safety case is possible at this level.
+- Factor(U,T): An untrusted strong model decomposes coding tasks, and trusted weaker models implement the pieces [@luecheelip2025factor].
+- Maybe Scientist AI [@bengio2025scientist]. A non-agentic model proposes the most informative experiments, and humans run them.
+- Somewhat resembles @buhl2025debate.
+
+## Splits
+
+All of the staff split their time: $N_p$ goes to planning rounds with the AI researcher, $N_v$ to verifying papers. Nobody keeps researching[^keepresearch].
+
+## Research
+
+The AI engineer does all of the coding, so coding labor is AIFM's AI-only coding labor at the engineer's capability $E_{AC}$. $X_e$ is what the labs would research if every round they could run were planned.
+
+### Taste
+
+The AI researcher sets the plans, but the AI engineer makes the implementation choices inside them. So the plans' taste $T_w$ is the engineer's, plus the share $w$ of the researcher's advantage over it. Nobody else chooses research, so people's taste drops out: $T(E, 0) = T_{AI}(E)$.
+
+## Plans and Checks
+
+Not every research plan leads to a paper. Sometimes you need to iterate after getting experimental results, and sometimes you just decide to drop the project altogether. A paper takes $m_p$ rounds of planning on average, counting the rounds of dropped projects. Each round takes $\tau_p$ of the human lead's time. So planning labor $N_p$ makes $F$ papers a year, not more than the $n$ papers the labs could run. A check takes $m_h$ verifiers $\tau$ each, so verifying labor $N_v$ checks $V$ papers a year, not more than the $F$ planned ones. Both times grow with $F$, the papers the labs actually write: only those are prerequisites to study.
+
+## Verified Research
+
+In Results Verification, we assumed people can quickly understand which papers are worth the most and verify them first. We don't assume the same for plans. It's harder to say which plans will result in important papers. So the planned papers are a random share of what the labs could write: the same average research $\bar r$, the same spread of idea quality and of compute, all with the plans' taste $T_w$. 
+
+Verifiers check the $V$ of the $F$ papers worth the most. They choose from the $F$ planned papers, not all $n$, but these are spread the same way, so the checked ones hold the share $\varphi_h(V / F)$ of the planned papers' research effort.
+
+## Planning Work
+
+$W_p$ is the staff time needed to plan every round the labs could run, derived like $W$ from the same paper count. As with review time, a paper's planning time doesn't depend on its compute: a bigger paper takes the same number of rounds, each directing more compute. And as with review time, the lead has to study the prerequisites: every tenfold more papers adds $p_p$ FTE-years to a paper's planning. Then $q_p$ is the share of the labs' rounds that get planned, and $q$ the share of their papers that get checked, as in Results Verification, only now at most $q_p$: unplanned rounds write no papers. The verifiers check the top $q / q_p$ of the planned papers, so verified research effort is that of Results Verification, applied to the rounds that ran.
+
+Planned papers are a random share of the labs' papers, so their idea quality and compute are distributed the same way, and we can use the closed form (33), with the bar $u$ set by $q / q_p$ instead of $q$.
+
+## Compute Budget
+
+As in Results Verification, the labs re-run exactly the checked papers, at $\kappa_c / M$ of the compute each takes. They hold the share $\psi(q / q_p)$ of the planned papers' compute, which is the share $q_p$ of the labs' exploration compute $C_e$. The compute of unplanned rounds stays idle.
+
+## Planning vs Verifying
+
+Nobody keeps researching, so the labs distribute humans between planning and paper verification. We model it in an optimal way.
+
+## Unlimited Hiring
+
+As in Results Verification, the labs can hire the people they lack: $q_p = q = 1$. All of their own staff plan and verify, and they hire the rest, so planning costs only headcount.
+
+## Table
+
+See how we estimated the input [parameters](note:parameters).
+
+## Limitations
+
+In addition to the limitations of Results Verification:
+
+- If we were bottlenecked by planning (we aren't with our input parameters), some compute would sit idle. Real labs would use it, but it's hard to say how it would change the papers' compute $c_i$. We think that with other input parameters this might matter, and the model would then understate $RE$.
+
+- The AI engineer gets all of $C_{aut}$, so we don't count the AI researcher's own compute. It may take a few percent of $C$, but we don't think that changes the results much.
+
+- The project lead always approves the plan. In reality, a lead who sees something unsafe would ask the AI researcher to change the plan, or would edit it themselves. We think it doesn't change the results much.
+
+
+
+# Workload Approval
+
+Workload Approval is the [Compartmentalization](#compartmentalization) model with the changes described in all the subsections below.
+
+## Protocol
+
+Besides AI takeover, there are also risks from concentration of power and misuse. To reduce all of them, AI companies in AI 2040 declare each workload with its full code, and teams of auditors approve it before it runs, so that countries can trust each other's labs. When we started this project, one of the questions we wanted to answer was how much slower full workload approval would be.
+
+We aim to model Plan A, with some necessary changes: we simplify some things and fill in some gaps in the original plan.
+
+Specifically:
+- We modify the Compartmentalization protocol.
+  - We think something like it is realistic in practice.
+  - It simplifies our model description, so this section can be short.
+- $N_a$ auditors read and approve the code, which decreases coding labor $L_C$.
+
+<Flow label="Who reads, writes and runs what in a round of research with workload approval">
+<div data-node="lead" data-to="plan"><span className="flow-label">Project lead</span>Human: approves the plan</div>
+<div data-node="researcher" data-to="plan"><span className="flow-label">AI researcher</span><Milestone>SAR</Milestone> or above: reads, runs nothing</div>
+<div data-node="plan" data-to="engineer" className="flow-wide"><span className="flow-label">High-level plan</span>Experiment description and what to report</div>
+<div data-node="engineer" data-to="auditors" className="flow-wide"><span className="flow-label">AI engineer</span><Milestone>AC</Milestone> level: writes the code, runs it once approved</div>
+<div data-node="auditors" data-to="store report" className="flow-wide"><span className="flow-label">Auditors</span>Humans outside the labs: read the code and approve it</div>
+<div data-node="store" data-to="verifiers"><span className="flow-label">Store</span>Code, logs and data</div>
+<div data-node="report" data-to="library"><span className="flow-label">Report</span>The planned graphs and metrics</div>
+<div />
+<div data-node="library" data-to="researcher verifiers"><span className="flow-label">Library</span>Plans, reports and papers</div>
+<div data-node="verifiers" className="flow-wide flow-out"><span className="flow-label">Verifiers</span>Humans: check the best papers against the code and data, and re-run them</div>
+<figcaption>The dashed arrow is the next round. Only approved code runs, and only the verifiers read the store.</figcaption>
+</Flow>
+
+It's unclear whether results still need to be verified after these checks. When we removed verification from the simulation, research effort rose by ~3%, because results verification is no longer a bottleneck in this scenario. We kept it for brevity.
+
+As in AI 2040, the auditors are a separate pool of $N_a$ people outside the labs. Compared with Compartmentalization, the labs lose research effort in one more way: they run only as much code as the auditors can read. We calculate the final table for a fixed $N_a$, but see [this section](#number-of-auditors) for an analysis of the number of auditors.
+
+Workload Approval applies to the <Milestone>SAR</Milestone> and <Milestone>TED-AI</Milestone> rows only.
+
+## Approval
+
+
+
+Let $\kappa_a$ be an auditor's time to approve code, relative to the time it took to write it: approving the code that one FTE of coding labor writes in a year takes $\kappa_a$ of an auditor's year. So approving everything the AI engineer writes takes $W_a = \kappa_a L_C$ auditors.
+
+$N_a$ auditors approve $N_a / \kappa_a$ of coding labor. Code that nobody approved doesn't run, so the approved coding labor $L_C^a$ is the smaller of the two.
+
+## Research
+
+## Unlimited Hiring
+
+As in Compartmentalization, the labs hire the leads and verifiers they lack. They don't hire auditors: they are a separate constant pool.
+
+## Table
+
+See how we estimated the input [parameters](note:parameters).
+
+## Number of Auditors
+
+We don't know how many auditors a pause would have. The main table uses a big but realistic <Value input="N_a" /> auditors (see [rationale](note:parameters)).
+
+We simulated the pause with different numbers of auditors. They remain the biggest bottleneck, reducing the research stock to 23–41% of Compartmentalization's.
+
+## Limitations
+
+In addition to the limitations of Compartmentalization:
+
+- For simplicity, we keep the labor ceiling $l_\infty$. Every paper still has all the coding labor it can use. It made sense for Compartmentalization but may make less sense for Workload Approval. You would probably prefer simpler, shorter code to speed up approval. In our model, that would reduce the number of papers to verify and increase their research $r_i$. It's also likely unimportant, as this model is bottlenecked by auditors reading the code, not by paper verifiers.
+
+- Approval takes time. Every run, even a debugging one, waits for an auditor. The labs can work on other projects meanwhile, but each paper takes longer. In our model, rounds take no time.
+
+# Sensitivity Analysis
+
+See the [tornado plots](note:sensitivity).
+
+# Capability Scaling Strategy
+
+How much does it cost to scale up to TED-AI slowly? Labs that get there later spend less time with the most capable AI. We bound how much later they have to hand off to do as much safety research as labs that scaled fast. See [the bound](note:slow-scaling).
+
+# Extend the Model
+
+Here are some ideas for how these models can be extended.
+
+- Add your favorite AI control frameworks and protocols:
+  - Monitors require compute. Model this by scaling $\eta$.
+  - Monitors escalate to humans. When they do, humans have to verify some part of $L_C$. What activation rate do you expect?
+  - Do anti-collusion protocols change anything?
+- Add debates [@irving2018debate; @irving2019social].
+  - They require more human time.
+- Add mixed deployment [@nardo2025mixed; @nardo2026ensuring; @finnveden2026zoo].
+- Defend against persuasion and bribery: add more people?
+
+
+
+[^version]: Their site describes AIFM's Dec 2025 version. We use and describe their code, which is the Aug 2026 version [@lifland2026q25].
+
+[^staff]: AIFM's staff trajectory is aggressive: its leading lab keeps hiring fast for years. By default, we freeze it at the start of the pause; with unlimited hiring, the labs hire the verifiers they lack. Like AIFM, we count only engineering staff.
+
+[^tail]: Strictly, AIFM never automates a tiny share of the tasks, so people keep doing them. In our tables, this changes research effort by less than 0.03%, except in Results Verification at TED-AI with the labs' own staff: there the AI codes so much that the labs keep 1–6% of their staff on these tasks, and the cells are up to 2.3% lower.
+
+[^keepscaling]: More formally: p(good future | we decide to keep scaling) grows with the AI safety research stock. We are less sure about p(good future), because more research stock might increase p(we decide to keep scaling).
+
+[^paper]: We also tried other names here. "Finding" might imply something about constant scientific value. "Research item" is the most accurate, but too verbose.
+
+[^psi]: Here is how $\psi$ follows from a fixed $C_e$:
+
+    1. Research: $X_e = X(C_e, L_C(N_e, C_{aut}, E_p))$ (19).
+    2. Paper count: $n / n_s$ from $X_e$ and $C_e$ (29), as it depends on both research and compute.
+    3. Review work: $W = m_h n \tau$ (26), the verifier time needed to check every paper, with $\tau$ from $n / n_s$ (25).
+    4. Share checked: $q = \min(1, N_v / W)$ (30).
+    5. Share of compute checked: $\psi(q)$ (33).
+    6. Re-runs: $C_r = (\kappa_c / M)\, \psi C_e$ (34).
+
+[^researchers-engineers]: We give the more capable model to research planning because a plan is text that a person reads, while engineering means running code with access to the cluster. That gives a misaligned model far more chances to cause harm. It doesn't represent difficulty for humans: frontier engineering is as demanding as research, and in practice the two roles often overlap.
+
+[^plan]: It says what experiment to run, on how much compute, with what data, which graphs and metrics to report, and what results to expect. It doesn't write code.
+
+[^threat]: We do it to reduce the attack surface for the AI researcher.
+
+[^keepresearch]: It's $N_p + N_v \le L_H$, not $=$. In previous models, people could do research and increase $X_e$ a little. Now humans don't do research, so the labs may have more staff than they need for planning and verification. The rest do nothing.

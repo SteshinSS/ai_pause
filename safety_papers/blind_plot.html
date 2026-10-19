@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blind compute estimates</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --band: rgba(11, 11, 11, 0.06); --diag: #52514e; --border: rgba(11, 11, 11, 0.10);
+    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --text-primary: #ffffff; --text-secondary: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --band: rgba(255, 255, 255, 0.07); --diag: #c3c2b7; --border: rgba(255, 255, 255, 0.10);
+      --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --text-primary: #ffffff; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --band: rgba(255, 255, 255, 0.07); --diag: #c3c2b7; --border: rgba(255, 255, 255, 0.10);
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+  }
+  html, body { margin: 0; background: var(--surface-1); }
+  body { background: #fcfcfb; }
+  @media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) body { background: #1a1a19; } }
+  :root[data-theme="dark"] body { background: #1a1a19; }
+  .viz-root { background: var(--surface-1); color: var(--text-primary); padding: 24px 16px 32px;
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--text-secondary); margin: 0 0 16px; max-width: 75ch; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  .legend button { display: inline-flex; align-items: center; gap: 8px; font: inherit; color: var(--text-primary);
+    background: none; border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .legend button[aria-pressed="false"] { color: var(--muted); }
+  .legend button[aria-pressed="false"] .key { opacity: 0.25; }
+  .key { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 0; }
+  .stats { color: var(--text-secondary); margin: 2px 0 8px; font-variant-numeric: tabular-nums; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .gl { stroke: var(--grid); stroke-width: 1; }
+  .tick { fill: var(--muted); font-size: 11px; }
+  .axis-title { fill: var(--text-secondary); font-size: 12px; }
+  .band { fill: var(--band); }
+  .diag { stroke: var(--diag); stroke-width: 1; }
+  .fit { stroke: var(--text-primary); stroke-width: 2; opacity: 0.55; }
+  .ref-label { fill: var(--muted); font-size: 11px; }
+  .dot { stroke: var(--surface-1); stroke-width: 1.5; opacity: 0.85; }
+  .dot.hl { opacity: 1; stroke: var(--text-primary); stroke-width: 2; }
+  .hit { fill: transparent; cursor: pointer; }
+  .hit:focus { outline: none; }
+  .tip { position: fixed; pointer-events: none; background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; max-width: 340px; font-size: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); display: none; z-index: 2; }
+  .tip b { font-weight: 600; }
+  .tip .row { display: flex; justify-content: space-between; gap: 12px; font-variant-numeric: tabular-nums; }
+  .tip .m { color: var(--text-secondary); }
+  .note { color: var(--muted); font-size: 12px; margin-top: 16px; max-width: 75ch; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <h1>Blind compute estimates vs the authors' figures</h1>
+  <p class="sub" id="sub"></p>
+  <div class="legend" id="legend" role="group" aria-label="Show papers by what the authors' figure covers"></div>
+  <div class="grid" id="panels"></div>
+  <p class="note">Each dot is one AI-safety paper whose authors state their compute. Horizontal: the authors' figure;
+    vertical: the model's estimate from the same paper with every compute passage deleted. Both in H100e-hours
+    as AI 2027 counts them (TPP), log scale. The diagonal is a perfect estimate; the band is within ×3; the dark line is the least-squares fit of the log estimate on the log figure. Papers where
+    a model said the text still revealed the compute, or refused, are left out. Hover a dot to see the
+    paper; the same paper is outlined in the other panel. Data: data/blind/dataset.csv.</p>
+  <div class="tip" id="tip"></div>
+</div>
+<script>
+const DATA = /*DATA*/;
+const PANELS = /*PANELS*/;  // [title, estimate column, years or null]
+const LEVELS = [["all", "All reported experiments", "var(--series-1)"],
+                ["part", "A named part", "var(--series-2)"],
+                ["project", "Whole project", "var(--series-3)"]];
+const shown = new Set(LEVELS.map(l => l[0]));
+const NS = "http://www.w3.org/2000/svg";
+const log = Math.log10;
+const LABELS = /*LABELS*/;  // estimate column -> name in the tooltip
+const KEYS = [...new Set(PANELS.map(p => p[1]))];
+const vals = DATA.flatMap(d => [d.true, ...KEYS.map(k => d[k])]).filter(v => v > 0);
+const LO = Math.floor(log(Math.min(...vals))), HI = Math.ceil(log(Math.max(...vals)));
+const W = 480, H = 470, M = {l: 62, r: 14, t: 10, b: 50};
+const sx = v => M.l + (log(v) - LO) / (HI - LO) * (W - M.l - M.r);
+const sy = v => H - M.b - (log(v) - LO) / (HI - LO) * (H - M.t - M.b);
+const sup = n => String(n).replace(/-/g, "⁻").replace(/\d/g, c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]);
+const hours = h => h >= 10 ? Math.round(h).toLocaleString() : h >= 0.01 ? h.toPrecision(2) : h.toExponential(1);
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+document.getElementById("sub").textContent = `${DATA.length} papers, 2020–2025. /*SUB*/`;
+
+const legend = document.getElementById("legend");
+for (const [key, label, color] of LEVELS) {
+  const n = DATA.filter(d => d.level === key).length;
+  const b = document.createElement("button");
+  b.setAttribute("aria-pressed", "true");
+  b.innerHTML = `<span class="key" style="background:${color}"></span>${label} <span class="m">${n}</span>`;
+  b.onclick = () => {
+    shown.has(key) ? shown.delete(key) : shown.add(key);
+    b.setAttribute("aria-pressed", shown.has(key));
+    render();
+  };
+  legend.appendChild(b);
+}
+
+const tip = document.getElementById("tip");
+function showTip(d, ev) {
+  const lv = LEVELS.find(l => l[0] === d.level);
+  tip.innerHTML = `<b>${d.id}</b> · ${d.year}<br>${d.title}<br><span class="m">${lv[1]}` +
+    (d.level === "part" ? `: ${d.covers}` : "") + `</span><hr style="border:0;border-top:1px solid var(--border)">` +
+    [["Authors", d.true], ...KEYS.map(k => [LABELS[k] || k, d[k]])].map(([k, v]) =>
+      `<div class="row"><span>${k}</span><span>${hours(v)} H100e-h` +
+      (k === "Authors" ? "" : ` · ×${(v / d.true).toPrecision(2)}`) + `</span></div>`).join("");
+  tip.style.display = "block";
+  const x = Math.min(ev.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  const y = ev.clientY + 14 + tip.offsetHeight > window.innerHeight ? ev.clientY - tip.offsetHeight - 14 : ev.clientY + 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+  document.querySelectorAll(`.dot[data-id="${d.id}"]`).forEach(c => { c.classList.add("hl"); c.parentNode.appendChild(c); });
+}
+function hideTip() {
+  tip.style.display = "none";
+  document.querySelectorAll(".dot.hl").forEach(c => c.classList.remove("hl"));
+}
+
+function stats(rows, key) {
+  const r = rows.map(d => log(d[key] / d.true)).sort((a, b) => a - b);
+  if (!r.length) return "no papers shown";
+  const med = r[Math.floor((r.length - 1) / 2)];
+  const within = r.filter(v => Math.abs(v) <= log(3)).length / r.length;
+  const xs = rows.map(d => log(d.true)), ys = rows.map(d => log(d[key]));
+  const mx = xs.reduce((a, b) => a + b) / xs.length, my = ys.reduce((a, b) => a + b) / ys.length;
+  let sxy = 0, sxx = 0, syy = 0;
+  xs.forEach((x, i) => { sxy += (x - mx) * (ys[i] - my); sxx += (x - mx) ** 2; syy += (ys[i] - my) ** 2; });
+  return `n ${rows.length} · median estimate/true ×${(10 ** med).toPrecision(2)} · within ×3 ` +
+    `${Math.round(within * 100)}% · correlation of logs ${(sxy / Math.sqrt(sxx * syy)).toFixed(2)} · ` +
+    `slope ${(sxy / sxx).toFixed(2)}`;
+}
+
+function fit(rows, key) {
+  const xs = rows.map(d => log(d.true)), ys = rows.map(d => log(d[key]));
+  const mx = xs.reduce((a, b) => a + b) / xs.length, my = ys.reduce((a, b) => a + b) / ys.length;
+  let sxy = 0, sxx = 0;
+  xs.forEach((x, i) => { sxy += (x - mx) * (ys[i] - my); sxx += (x - mx) ** 2; });
+  const b = sxy / sxx;
+  return [Math.min(...xs), Math.max(...xs)].map(x => [10 ** x, 10 ** (my + b * (x - mx))]);
+}
+
+function render() {
+  const panels = document.getElementById("panels");
+  panels.innerHTML = "";
+  for (const [name, key, years] of PANELS) {
+    const rows = DATA.filter(d => shown.has(d.level) && (!years || years.includes(d.year)));
+    const box = document.createElement("div");
+    box.innerHTML = `<h2>${name}</h2><div class="stats">${stats(rows, key)}</div>`;
+    const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, role: "img",
+      "aria-label": `${name}: model estimate against the authors' figure, log-log`}, box);
+    for (let e = LO; e <= HI; e++) {
+      el("line", {class: "gl", x1: sx(10 ** e), x2: sx(10 ** e), y1: M.t, y2: H - M.b}, svg);
+      el("line", {class: "gl", y1: sy(10 ** e), y2: sy(10 ** e), x1: M.l, x2: W - M.r}, svg);
+      el("text", {class: "tick", x: sx(10 ** e), y: H - M.b + 16, "text-anchor": "middle"}, svg).textContent = "10" + sup(e);
+      el("text", {class: "tick", x: M.l - 8, y: sy(10 ** e) + 4, "text-anchor": "end"}, svg).textContent = "10" + sup(e);
+    }
+    const a = 10 ** LO, b = 10 ** HI, k = 3;
+    el("polygon", {class: "band", points: [[a, a * k], [b / k, b], [b, b], [b, b / k], [a * k, a], [a, a]]
+      .map(([x, y]) => `${sx(x)},${sy(y)}`).join(" ")}, svg);
+    el("line", {class: "diag", x1: sx(a), y1: sy(a), x2: sx(b), y2: sy(b)}, svg);
+    el("text", {class: "ref-label", x: sx(b / 30) , y: sy(b / 30) - 8, "text-anchor": "end",
+      transform: `rotate(-45 ${sx(b / 30)} ${sy(b / 30) - 8})`}, svg).textContent = "estimate = true";
+    el("text", {class: "axis-title", x: (M.l + W - M.r) / 2, y: H - 10, "text-anchor": "middle"}, svg)
+      .textContent = "Authors' figure (H100e-hours)";
+    el("text", {class: "axis-title", transform: `translate(14 ${(M.t + H - M.b) / 2}) rotate(-90)`,
+      "text-anchor": "middle"}, svg).textContent = "Model estimate (H100e-hours)";
+    const dots = el("g", {}, svg), hits = el("g", {}, svg);
+    if (rows.length > 2) {
+      const [[x1, y1], [x2, y2]] = fit(rows, key);
+      el("line", {class: "fit", x1: sx(x1), y1: sy(y1), x2: sx(x2), y2: sy(y2)}, svg);
+    }
+    for (const [lv, , color] of LEVELS) {
+      for (const d of rows.filter(d => d.level === lv)) {
+        el("circle", {class: "dot", "data-id": d.id, cx: sx(d.true), cy: sy(d[key]), r: 4, fill: color}, dots);
+        const h = el("circle", {class: "hit", cx: sx(d.true), cy: sy(d[key]), r: 8, tabindex: 0,
+          "aria-label": `${d.id}: authors ${hours(d.true)}, estimate ${hours(d[key])} H100e-hours`}, hits);
+        h.addEventListener("pointermove", ev => showTip(d, ev));
+        h.addEventListener("pointerleave", hideTip);
+        h.addEventListener("focus", () => { const r = h.getBoundingClientRect(); showTip(d, {clientX: r.right, clientY: r.bottom}); });
+        h.addEventListener("blur", hideTip);
+      }
+    }
+    panels.appendChild(box);
+  }
+}
+render();
+</script>
+</body>
+</html>

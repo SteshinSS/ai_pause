@@ -1,0 +1,16 @@
+{
+  "id": "eli-08-16-26",
+  "forecaster": "Eli",
+  "date": "08-16-26",
+  "customIdentifier": null,
+  "sourceRunDir": "/root/aifm_daniel_run/outputs/eli_q2_10k_taste/20260811_004335",
+  "modelVersion": null,
+  "exportedAt": "2026-08-11T01:22:15.295523",
+  "numSamples": 10000,
+  "presentDay": 2026.578082,
+  "timeRange": [
+    2017.0,
+    2200.0
+  ],
+  "seed": 20260810
+}

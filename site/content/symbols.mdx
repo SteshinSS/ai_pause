@@ -1,0 +1,351 @@
+---
+title: Symbols
+skip: d e
+---
+
+{/*
+The popups of the symbols in the maths of notes with `symbols: true` in their frontmatter (notes/model.mdx,
+notes/model-explanations.mdx, notes/parameters.mdx and others).
+One entry per symbol, anywhere in this file; headings and other text here are only for finding your way.
+
+- tex: the symbol as the formulas write it. A superscript after it that isn't part of tex is an exponent.
+- under: only in formulas under a heading with this text, for a letter that means two things (k).
+- unit: its units; leave it out when it has none.
+- input: an input's name in table.json (pause_inputs.csv or AIFM's parameters): the popup shows its value.
+- value: a value in words, when it isn't an input.
+- supplement: sections of AIFM's supplementary materials that discuss it, by heading id, separated by spaces: the
+  popup links to them. The id ends the link Google Docs copies for a heading (…#heading=h.8ex8cl6mlxgj);
+  supplement.json lists them with their titles (`npm run supplement` refreshes it). Rows of the doc's
+  tables often share an id, and a link goes to the first: the popup shows that one's title.
+- The text between the tags: what it is, markdown with $maths$.
+
+skip: letters in formulas that aren't symbols (d of dt, e of e^x), so the build doesn't warn about them.
+*/}
+
+# Full Trust
+
+## Effective Compute
+
+<Symbol tex="E" unit="effective FLOP" supplement="h.wt4szrio8662">Effective compute: the frontier model's capability as AIFM measures it. It sums the compute spent on training, each FLOP weighted by how good the algorithms were at the time.</Symbol>
+
+<Symbol tex="C_{train}" unit="H100e" supplement="h.c27vdwbamhn6">Compute running the frontier model's training. Zero during a pause.</Symbol>
+
+<Symbol tex="S" supplement="h.5zk7qhk1zfpk">Software efficiency: how much more a FLOP of training achieves with the algorithms of the time.</Symbol>
+
+<Symbol tex="t" unit="years">Time.</Symbol>
+
+<Symbol tex="E_p" unit="effective FLOP">Effective compute when the pause starts. It stays there for the whole pause.</Symbol>
+
+## Merged Labs
+
+<Symbol tex="C" unit="H100e">Compute of the merged labs (OpenAI, Anthropic and Google DeepMind), in H100-equivalents: how many H100 GPUs it would take.</Symbol>
+
+<Symbol tex="C^{\mathrm{AIFM}}" unit="H100e" supplement="h.wgnkcfasd2kl">Compute of AIFM's leading lab, from AIFM's forecast, which is based on OpenAI.</Symbol>
+
+<Symbol tex="m_C" input="m_C">The merged labs' compute relative to AIFM's leading lab.</Symbol>
+
+<Symbol tex="L_H" unit="FTE">Staff of the merged labs: their engineers, as many as at the start of the pause.</Symbol>
+
+<Symbol tex="L_H^{\mathrm{AIFM}}" unit="FTE" supplement="h.d5uww61fnaz9">Engineers of AIFM's leading lab, from AIFM's forecast, which is based on OpenAI: the only staff AIFM's model counts.</Symbol>
+
+<Symbol tex="m_L" input="m_L">The merged labs' staff relative to AIFM's leading lab.</Symbol>
+
+## Compute Shares
+
+<Symbol tex="C_{xpm}" unit="H100e">Compute for research experiments: what training, AI coders and external deployment leave. In a pause, training takes none.</Symbol>
+
+<Symbol tex="C_{aut}" unit="H100e" supplement="h.z7ycqinxkjj6">Compute running AI coders.</Symbol>
+
+<Symbol tex="C_{ext}" unit="H100e">Compute serving external users, frozen at what it was when the pause started.</Symbol>
+
+<Symbol tex="s_{aut}" input="s_aut" supplement="h.z7ycqinxkjj6">Share of the compute that runs AI coders, as in AIFM.</Symbol>
+
+<Symbol tex="s_{ext}" input="s_ext">Share of the compute serving external users when the pause starts, as in AIFM, where it is what training, experiments and AI coders leave.</Symbol>
+
+<Symbol tex="t_p">When the pause starts: a row of the tables.</Symbol>
+
+## Experiment Throughput
+
+### Coding Labor
+
+<Symbol tex="i" under="Coding Labor">A coding task. Tasks run from 0 to 1, in the order the AI learns to do them.</Symbol>
+
+<Symbol tex="G_i" unit="FTE">People and AI coders on task $i$ together, AI coders counted as the people they replace.</Symbol>
+
+<Symbol tex="L_{H,i}" unit="FTE">Staff on task $i$.</Symbol>
+
+<Symbol tex="\eta_i" unit="FTE per H100e">How many people one H100e of AI coders replaces on task $i$: zero until the AI can do the task, then growing with $E$.</Symbol>
+
+<Symbol tex="\eta" unit="FTE per H100e">AI coders' efficiency: how many people one H100e of AI coders replaces, $\eta_i$ on task $i$.</Symbol>
+
+<Symbol tex="C_{aut,i}" unit="H100e">Compute of the AI coders on task $i$.</Symbol>
+
+<Symbol tex="L_C" unit="FTE" supplement="h.yxoz7suuy7kc">Coding labor: the coding that people and AI coders get done together. With no people, $L_C(0, C_{aut}, E)$, it is AIFM's AI-only coding labor, which is above zero once the AI can do every coding task, from AC on.</Symbol>
+
+<Symbol tex="\rho_C" input="rho_coding_labor" supplement="h.wqcz0ulbaih6 h.sj6vq0agill7">How coding tasks substitute for each other. Below 0 they complement each other: the tasks nobody does well hold the rest back.</Symbol>
+
+#### Automation
+
+<Symbol tex="A" supplement="h.2mpyhiqhyws5 h.h1t0i8bvad56">Automation fraction: the share of coding tasks the AI can do at effective compute $E$.</Symbol>
+
+<Symbol tex="A_\infty" input="automation_logistic_asymptote" supplement="h.heza96pdu90x">The level the sigmoid tends to. It is above 1, so the AI can do every task at a finite $E$.</Symbol>
+
+<Symbol tex="k" under="Automation" unit="per OOM of E" input="automation_logistic_k" supplement="h.dm95fh6gqk3j">Steepness of the sigmoid: how fast automation spreads as $E$ grows. AIFM sets it and $x_0$ so that AI coders match today's coding uplift and how fast it grows.</Symbol>
+
+<Symbol tex="x_0" unit="log₁₀ of effective FLOP" supplement="h.dm95fh6gqk3j">Midpoint of the sigmoid, where $A$ is half of $A_\infty$.</Symbol>
+
+<Symbol tex="E_i" unit="effective FLOP">Effective compute at which the AI can first do task $i$.</Symbol>
+
+<Symbol tex="E_{AC}" unit="effective FLOP" supplement="h.h1t0i8bvad56 h.dm95fh6gqk3j">Effective compute of the Automated Coder (AC), the first AI that can do every coding task.</Symbol>
+
+<Symbol tex="E_{SAR}" unit="effective FLOP">Effective compute of the Superhuman AI Researcher (SAR), the first AI whose research taste matches the top human researcher's.</Symbol>
+
+<Symbol tex="\eta_{init}" unit="FTE per H100e" input="optimal_ces_eta_init" supplement="h.pmv4sli0dm5m">How many people one H100e of AI coders replaces on a task when the AI can first do it.</Symbol>
+
+<Symbol tex="\eta_{slope}" input="coding_automation_efficiency_slope" supplement="h.endn64m955cs h.9sgxfltrr7wj">How fast AI coders get better at a task they can do: each tenfold increase in $E$ multiplies $\eta_i$ by $10^{\eta_{slope}}$.</Symbol>
+
+### Experiment Throughput
+
+<Symbol tex="X" unit="AIFM research units per year" supplement="h.kaledsfvsgle">Experiment throughput: the research the labs get done in a year, their experiments weighted by the compute and coding they take.</Symbol>
+
+<Symbol tex="\alpha_X" input="alpha_experiment_capacity" supplement="h.kaledsfvsgle">Weight of experiment compute, against coding labor, in throughput.</Symbol>
+
+<Symbol tex="\tilde C_{xpm}">Experiment compute after its diminishing returns: $C_{xpm}^{\zeta}$.</Symbol>
+
+<Symbol tex="\tilde L_C">Coding labor after the penalty for working in parallel, AIFM's serial coding labor: $L_C^{\lambda}$.</Symbol>
+
+<Symbol tex="\rho_X" input="rho_experiment_capacity" supplement="h.kaledsfvsgle">How compute and coding labor substitute for each other. Below 0 they complement each other: more of one raises throughput only up to a ceiling set by the other.</Symbol>
+
+<Symbol tex="\zeta" input="experiment_compute_exponent" supplement="h.kaledsfvsgle h.5bu7mtrzvrrm">Returns to experiment compute: ten times the compute counts as $10^{\zeta}$ times as much.</Symbol>
+
+<Symbol tex="\lambda" input="parallel_penalty" supplement="h.8ex8cl6mlxgj">Penalty for working in parallel: twice the coders count as $2^{\lambda}$ times as many.</Symbol>
+
+## Research Taste
+
+<Symbol tex="T_{AI}^{SD}" unit="SDs of human taste" supplement="h.k257jhacudua">The AI's place among human researchers: its taste is that of a human this many SDs above the median.</Symbol>
+
+<Symbol tex="T_{AC}^{SD}" unit="SDs of human taste" input="ai_research_taste_at_coding_automation_anchor_sd" supplement="h.kbgu2lmpzrn8">The AI's place among human researchers at AC.</Symbol>
+
+<Symbol tex="s_T" unit="SDs per OOM of E" input="ai_research_taste_slope" supplement="h.y0yy6iou4a4q h.9sgxfltrr7wj">How far up the human range the AI moves with each tenfold increase of effective compute.</Symbol>
+
+<Symbol tex="T_H" unit="average human researcher = 1" supplement="h.k53tugksut89 h.b9bh9p4i506y h.791kyhzi61xv">The research taste of a human researcher $Z$ SDs above the median, with average 1: nearly lognormal over the human range, bent below a ceiling far above it.</Symbol>
+
+<Symbol tex="Z" unit="SDs" supplement="h.j8mlcgoxpv1m">A researcher's place among human researchers: standard normal.</Symbol>
+
+<Symbol tex="T_{AI}" unit="average human researcher = 1" supplement="h.9w7g17b3iid">The AI's research taste.</Symbol>
+
+<Symbol tex="T" unit="average human researcher = 1" supplement="h.aa7342mxmcnh">The labs' research taste: the average over their researchers, each taking the larger of their own taste and the AI's. In Results Verification, $T(E, N_e)$ is the taste of the labs' research when only the $N_e$ staff with the best taste keep researching, while the AI chooses the research of the rest.</Symbol>
+
+## Research Effort
+
+<Symbol tex="RE" unit="AIFM research units per year" supplement="h.5bu7mtrzvrrm">Research effort: throughput weighted by taste, the value of a year's research.</Symbol>
+
+## Research Stock
+
+<Symbol tex="RS" unit="AIFM research units" supplement="h.ibptwgw3jl2z">Research stock: all the research effort done so far.</Symbol>
+
+<Symbol tex="RS_0" unit="AIFM research units">The research stock when AIFM's run starts.</Symbol>
+
+<Symbol tex="\beta" supplement="h.ibptwgw3jl2z h.xdm3cwrbe676">Ideas get harder to find: every $\beta$ doublings of the research stock double $S$.</Symbol>
+
+## Table
+
+<Symbol tex="RS_s" unit="AIFM research units" input="RS_safety_2025">The research stock the whole 2025 AI safety field built in a year: the unit of the tables.</Symbol>
+
+<Symbol tex="X_s" unit="AIFM research units per year" input="RS_safety_2025">The research the whole 2025 AI safety field did in a year. Taste was 1 in 2025, so it equals $RS_s$.</Symbol>
+
+<Symbol tex="C_s" unit="H100e" input="C_safety_2025">Experiment compute of the 2025 AI safety field, failed projects included.</Symbol>
+
+<Symbol tex="N_s" unit="FTE" input="L_safety_2025">Researchers and engineers of the 2025 AI safety field.</Symbol>
+
+<Symbol tex="C_{aut,s}" unit="H100e">Compute of the 2025 field's AI coders: as much per person as the leading lab had in mid-2025.</Symbol>
+
+<Symbol tex="E_{2025}" unit="effective FLOP">Effective compute of the frontier model in mid-2025.</Symbol>
+
+<Symbol tex="D" unit="years">How long the pause lasts: a column of the tables.</Symbol>
+
+# Results Verification
+
+### Splits
+
+<Symbol tex="C_e" unit="H100e">Exploration compute: the AI's own experiments, not the re-runs.</Symbol>
+
+<Symbol tex="C_r" unit="H100e">Reproduction compute: re-runs of the checked papers' main experiments.</Symbol>
+
+<Symbol tex="N_e" unit="FTE">Staff who keep researching, as in AIFM: those with the best research taste. In Compartmentalization nobody does: $N_e \to 0$.</Symbol>
+
+<Symbol tex="N_v" unit="FTE">Staff who verify papers. In Compartmentalization the staff split their time between verifying and planning, and any time left over stays idle: $N_p + N_v \le L_H$.</Symbol>
+
+### Research
+
+<Symbol tex="X_e" unit="AIFM research units per year">The labs' research: AIFM's throughput of their exploration compute and of the coding labor of their researchers and AI coders. In Compartmentalization, with the AI engineer's coding labor alone, at $E_{AC}$: what they would research if every round were planned. In Workload Approval, with the approved coding labor $L_C^a$ instead.</Symbol>
+
+### Taste
+
+<Symbol tex="z" unit="SDs">A staff member's place among human researchers, as $Z$: their taste is $T_H(z)$.</Symbol>
+
+<Symbol tex="\hat z" unit="SDs">The cut: staff above it keep researching, staff below it verify. It keeps the share $N_e / L_H$ of the staff, those with the best taste.</Symbol>
+
+### Verified Research
+
+<Symbol tex="RE_e" unit="AIFM research units per year">The labs' research effort: their research $X_e$ weighted by their taste, $T X_e$. Per paper, $RE_i$.</Symbol>
+
+<Symbol tex="RE_i" unit="AIFM research units">Research effort of paper $i$: its research $r_i$ weighted by the labs' taste and by the quality of its idea, $T v_i r_i$. A year's papers add up to the labs' research effort $RE_e$.</Symbol>
+
+<Symbol tex="RE^v" unit="AIFM research units per year">Verified research effort: the research effort of the papers that were both reviewed and reproduced. In Results Verification, $\varphi_h RE_e$.</Symbol>
+
+<Symbol tex="\varphi_h">Share of the research effort held by the papers the verifiers check, when they check the top share $q$ of the papers they choose from: $\varphi_h(q)$. In Results Verification they choose from all of the papers, and verified research effort is $\varphi_h RE_e$. In Compartmentalization they choose from the planned papers: $\varphi_h(q / q_p)$.</Symbol>
+
+### Papers
+
+<Symbol tex="i">A paper, numbered from 1 to $n$.</Symbol>
+
+<Symbol tex="n" unit="papers per year">Papers the labs write in a year, failed projects not counted. In Compartmentalization, the papers of every round they could run: they write the planned share $q_p$ of them.</Symbol>
+
+<Symbol tex="r_i" unit="AIFM research units">Research of paper $i$: how much research went into it, whatever its idea. It grows with the paper's compute. A year's papers add up to the labs' research $X_e$.</Symbol>
+
+<Symbol tex="r_s" unit="AIFM research units">Research of a 2025 paper with the average 2025 paper's compute and labor, $\bar c_s$ and $\bar l_s$. A paper of the labs with that compute holds $l_\infty$ times more.</Symbol>
+
+<Symbol tex="l_\infty" input="l_inf">A paper's labor ceiling: with all the labor it can use, as the labs' papers have from AC on, a paper holds $l_\infty$ times the research of a 2025 paper with the same compute.</Symbol>
+
+<Symbol tex="v_i">Quality of paper $i$'s idea: what a unit of its research is worth, compared with the year's average paper. Its research effort is $RE_i = T v_i r_i$: idea quality spreads the labs' taste across their papers. Pareto, averaging 1 as in 2025, independent of the paper's compute.</Symbol>
+
+<Symbol tex="v_m">The weakest idea a paper can have, the floor of the Pareto distribution: $1 - 1/\alpha_v$, as idea quality averages 1.</Symbol>
+
+<Symbol tex="\alpha_v" input="alpha">Tail index of the papers' idea quality. Near 1 a few papers hold almost all of the research effort; the larger it is, the more evenly it spreads.</Symbol>
+
+<Symbol tex="c_i" unit="H100e-years">Compute spent on paper $i$, dead ends included.</Symbol>
+
+<Symbol tex="M" input="M">Compute of all projects relative to the compute of those that became papers. Some projects fail as a whole, and the papers carry them: with its share of the failed projects, paper $i$ takes $M c_i$ of the compute. The same for the 2025 field outside the AI labs and for the labs in the pause.</Symbol>
+
+<Symbol tex="\bar c" unit="H100e-years">The labs' average compute per paper, dead ends included: $C_e / (M n)$.</Symbol>
+
+<Symbol tex="\bar c_s" unit="H100e-years">The 2025 AI safety field's average compute per paper, dead ends included: $C_s / (M n_s)$.</Symbol>
+
+<Symbol tex="\zeta_p" input="zeta_p">Return of a paper's research to its compute: ten times the compute gives a paper $10^{\zeta_p}$ times more research, whatever its idea.</Symbol>
+
+<Symbol tex="\sigma_c" input="sigma_c">Spread of compute across a year's papers: the standard deviation of $\ln c_i$.</Symbol>
+
+<Symbol tex="l_i" unit="FTE-years">Coding labor spent on paper $i$, by people and AI coders together.</Symbol>
+
+<Symbol tex="\bar l_s" unit="FTE-years">The 2025 AI safety field's average coding labor per paper: its $L_C$ over $n_s$.</Symbol>
+
+<Symbol tex="c_\infty">A paper's compute ceiling: with all the compute it can use, a paper holds $c_\infty$ times the research of a 2025 paper with the same labor. It drops out once papers have all the labor they can use.</Symbol>
+
+<Symbol tex="\rho_p">How a paper's compute and labor substitute for each other, like $\rho_X$ for the labs. It is below 0, so each alone raises a paper's research only up to its ceiling. It drops out once papers have all the labor they can use.</Symbol>
+
+### Review Work
+
+<Symbol tex="t_s" unit="FTE-years">Staff time it took the 2025 field to produce a paper, all-in: $N_s / n_s$, dead ends, failed projects and reading included.</Symbol>
+
+<Symbol tex="n_s" unit="papers per year" input="n_s">Papers the 2025 AI safety field wrote in a year: the 2025 papers of our dataset.</Symbol>
+
+<Symbol tex="\kappa_h" input="kappa_h">One verifier's time to check a paper relative to the time it took the 2025 field to produce one, dead ends and failed projects included, when the labs write as many papers as the 2025 field: $\tau / t_s$ at $n = n_s$.</Symbol>
+
+<Symbol tex="\tau" unit="FTE-years">One verifier's time to check a paper, studying its prerequisites included. It grows with the number of papers.</Symbol>
+
+<Symbol tex="p_h" unit="FTE-years" input="p_h">Time a check gains for every tenfold more papers a year than the 2025 field wrote: the verifier's time to study the papers it builds on.</Symbol>
+
+<Symbol tex="m_h" unit="verifiers" input="m_h">Verifiers who check each paper, each on their own.</Symbol>
+
+### Paper Count
+
+<Symbol tex="k_X">How many times the 2025 field's research the labs do: $X_e / X_s$.</Symbol>
+
+<Symbol tex="s" under="Paper Count">In $\mathbb{E}_s$: an average over the 2025 field's papers, where $\mathbb{E}_e$ averages over the labs'.</Symbol>
+
+<Symbol tex="k_C">How many times the 2025 field's experiment compute the labs explore with: $C_e / C_s$.</Symbol>
+
+### Reviewer Budget
+
+<Symbol tex="q">Share of the labs' papers, by count, that get checked. In Compartmentalization at most $q_p$, as only planned rounds write papers.</Symbol>
+
+<Symbol tex="W" unit="FTE">Verifiers the labs would need, working full time, to check every paper.</Symbol>
+
+### Top Papers
+
+<Symbol tex="\chi_i">1 if the verifiers check paper $i$, 0 if not.</Symbol>
+
+<Symbol tex="\psi">Share of the compute held by the papers the verifiers check, when they check the top share $q$ of the papers they choose from: $\psi(q)$. In Results Verification they choose from all of the papers, and re-runs cost $\kappa_c \psi C_e / M$. In Compartmentalization they choose from the planned papers: $\psi(q / q_p)$.</Symbol>
+
+<Symbol tex="K" under="Top Papers" unit="AIFM research units">Research effort of a paper with the weakest idea, $v_m$, and the median compute, $\tilde c$. Any paper's is $RE_i = K e^{\varepsilon_i / \alpha_v} e^{\sigma_y \xi_i}$.</Symbol>
+
+<Symbol tex="\tilde c" unit="H100e-years">The median paper's compute: $\bar c\, e^{-\sigma_c^2 / 2}$.</Symbol>
+
+<Symbol tex="\varepsilon_i">Paper $i$'s idea term: an exponential draw with mean 1, with $v_i = v_m e^{\varepsilon_i / \alpha_v}$.</Symbol>
+
+<Symbol tex="\xi_i">Paper $i$'s compute term: a standard normal draw, with $c_i = \tilde c\, e^{\sigma_c \xi_i}$.</Symbol>
+
+<Symbol tex="\sigma_y">Spread of the compute term of $\ln RE_i$: $\zeta_p \sigma_c$, as research grows with compute to the power $\zeta_p$.</Symbol>
+
+<Symbol tex="u">The bar: the verifiers check the papers with $\ln RE_i$ at least $u$ above $\ln K$. The reviewer budget sets it through $q = G(u, \alpha_v)$, in Compartmentalization through $q / q_p$.</Symbol>
+
+<Symbol tex="G">Share of the papers above the bar $x$ when the idea term has rate $a$: the tail of $\varepsilon_i / a + \sigma_y \xi_i$.</Symbol>
+
+<Symbol tex="x" under="Top Papers">A bar on $\varepsilon_i / a + \sigma_y \xi_i$, in logarithms of research effort above $\ln K$.</Symbol>
+
+<Symbol tex="a" under="Top Papers">Rate of the exponential idea term: $\alpha_v$ when papers are counted or weighted by compute, $\alpha_v - 1$ when weighted by research effort.</Symbol>
+
+<Symbol tex="\Phi">The standard normal distribution function: the chance that a standard normal draw is below its argument.</Symbol>
+
+<Symbol tex="\delta">How far a weight $e^{\delta \xi_i - \delta^2 / 2}$ on the papers moves their compute terms $\xi_i$ up.</Symbol>
+
+<Symbol tex="f" under="Top Papers">Any function of a paper's compute term $\xi_i$.</Symbol>
+
+<Symbol tex="v" under="Top Papers">A level of idea quality.</Symbol>
+
+### Compute Budget
+
+<Symbol tex="\kappa_c" input="kappa_c">Share of the compute spent producing a paper, $c_i$, that a re-run of its main runs needs. The failed projects the paper carries aren't re-run.</Symbol>
+
+### Unlimited Hiring
+
+<Symbol tex="N_h" unit="FTE">People the labs hire beyond their staff: verifiers, and in Compartmentalization and Workload Approval also planners. They never hire auditors.</Symbol>
+
+# Compartmentalization
+
+### Splits
+
+<Symbol tex="N_p" unit="FTE">Staff time spent planning rounds with the AI researcher.</Symbol>
+
+### Taste
+
+<Symbol tex="T_w" unit="average human researcher = 1">Research taste of the plans: the AI engineer's, $T_{AI}(E_{AC})$, plus the share $w$ of the AI researcher's advantage over it.</Symbol>
+
+<Symbol tex="w" input="w">Share of the AI researcher's taste advantage over the AI engineer that its plans carry.</Symbol>
+
+### Plans and Checks
+
+<Symbol tex="F" unit="papers per year">Papers a year that the planning time $N_p$ produces, at most $n$: the papers the labs write.</Symbol>
+
+<Symbol tex="m_p" unit="rounds">Rounds a paper takes on average, counting the rounds of projects that give none.</Symbol>
+
+<Symbol tex="\tau_p" unit="FTE-years">A lead's time per round: talking with the AI researcher, reading its plan and results, and studying the prerequisites. It grows with the number of papers.</Symbol>
+
+<Symbol tex="V" unit="papers per year">Papers a year that the verifiers check, at most $F$.</Symbol>
+
+### Verified Research
+
+<Symbol tex="\bar r" unit="AIFM research units">Average research of a paper: $X_e / n$.</Symbol>
+
+### Planning Work
+
+<Symbol tex="\kappa_p" input="kappa_p">Planning time per paper relative to the time it took the 2025 field to produce one, dead ends and failed projects included, when the labs write as many papers as the 2025 field: $m_p \tau_p / t_s$ at $F = n_s$.</Symbol>
+
+<Symbol tex="p_p" unit="FTE-years" input="p_p">Time a paper's planning gains for every tenfold more papers a year than the 2025 field wrote: the lead's time to study the papers it builds on.</Symbol>
+
+<Symbol tex="W_p" unit="FTE">Staff the labs would need, working full time, to plan every round they could run.</Symbol>
+
+<Symbol tex="q_p">Share of the labs' rounds that get planned.</Symbol>
+
+# Workload Approval
+
+### Approval
+
+<Symbol tex="\kappa_a" input="kappa_a">Time to approve code relative to the time it took to write it: approving the code that one FTE of coding labor writes in a year takes $\kappa_a$ of an auditor's year.</Symbol>
+
+<Symbol tex="W_a" unit="FTE">Auditors the labs would need, working full time, to approve all of the engineer's code.</Symbol>
+
+<Symbol tex="N_a" unit="FTE" input="N_a">Auditors: people outside the labs who read the engineer's code and approve it before it runs. As many all pause, with either staffing.</Symbol>
+
+<Symbol tex="L_C^a" unit="FTE">Approved coding labor: the part of the engineer's coding labor that the auditors approve, the only part that runs.</Symbol>

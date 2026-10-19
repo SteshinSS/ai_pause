@@ -1,0 +1,16 @@
+{
+  "id": "brendan-08-16-26",
+  "forecaster": "Brendan",
+  "date": "08-16-26",
+  "customIdentifier": null,
+  "sourceRunDir": "/root/aifm_daniel_run/outputs/brendan_q2_10k/20260810_211209",
+  "modelVersion": null,
+  "exportedAt": "2026-08-10T21:32:18.807364",
+  "numSamples": 10000,
+  "presentDay": 2026.578082,
+  "timeRange": [
+    2017.0,
+    2200.0
+  ],
+  "seed": 20260810
+}

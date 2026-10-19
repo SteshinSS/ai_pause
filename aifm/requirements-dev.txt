@@ -1,0 +1,12 @@
+# Dev / test / offline-analysis dependencies. NOT installed in the Vercel
+# serverless deployment — keeping these out of requirements.txt keeps the
+# function bundle lean, since shap/scikit-learn (and numba, via shap) pull in
+# a lot that the deployed API never imports.
+# Install with: pip install -r requirements-dev.txt
+-r requirements.txt
+
+pytest>=8.4.0
+pytest-cov>=4.0.0
+scikit-learn        # offline plotting/KDE bandwidth search, covert-project figures
+shap                # feature attribution in plan_a_covert_proj figures
+huggingface_hub     # rollout results upload/download (scripts/hf_results.py)

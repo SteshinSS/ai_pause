@@ -1,0 +1,16 @@
+{
+  "id": "daniel-08-16-26",
+  "forecaster": "Daniel",
+  "date": "08-16-26",
+  "customIdentifier": null,
+  "sourceRunDir": "/root/aifm_daniel_run/outputs/daniel_q2_10k/20260810_192534",
+  "modelVersion": null,
+  "exportedAt": "2026-08-10T20:06:18.623067",
+  "numSamples": 10000,
+  "presentDay": 2026.578082,
+  "timeRange": [
+    2017.0,
+    2200.0
+  ],
+  "seed": 20260810
+}

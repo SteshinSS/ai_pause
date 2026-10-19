@@ -1,0 +1,32 @@
+# Runtime dependencies for the Vercel serverless Flask API (api/index.py).
+# Keep this lean — only what the deployed API actually imports. Dev/test and
+# offline analysis deps live in requirements-dev.txt / requirements-analysis.txt.
+# numpy/scipy are pinned exactly, not floored, so Vercel / this venv / the
+# remote compute box can't silently resolve different versions — before this
+# pin, aifm-runpod was on numpy 2.3.5 + scipy 1.16.3 while local had 2.4.1 +
+# 1.17.0. Bump deliberately, together, and re-check the golden tests.
+#
+# Note: this pin alone does NOT give bit-identical seeded draws across
+# machines. multivariate_normal(method="svd") diverges by CPU, because the
+# bundled OpenBLAS dispatches different SIMD kernels (measured: an AVX-512
+# EPYC vs a non-AVX-512 Intel disagree on identical numpy 2.4.1).
+#
+# If you need seeds to match across machines, fix it at the draw site with
+# method="cholesky" (the Cholesky factor is unique for a PD matrix, so the
+# seed->draw map stops depending on which SVD basis LAPACK picked).
+# Measured on a cond~1.2e4 correlation matrix, local vs the EPYC box, same
+# numpy: svd max_rel_diff 3.5e+01 (every element differs -> materially
+# different draws), eigh 6.9e+02, cholesky 1.0e-11 (last-bit rounding).
+# Cholesky is ~13 orders better, not exact -- compare goldens with a
+# tolerance, never exact float equality. Nothing is lost by switching here:
+# batch_rollout.py already calls np.linalg.cholesky() to validate the matrix
+# before sampling, so svd's tolerance of singular inputs is unreachable.
+# OPENBLAS_CORETYPE=Haswell also makes them agree, but treat it as a
+# diagnostic rather than config: it costs ~6-8% on dense linear algebra,
+# has to hold in every environment at once to mean anything, and silently
+# becomes a no-op under a non-OpenBLAS numpy (conda/MKL, Accelerate).
+numpy==2.4.1
+scipy==1.17.0
+pyyaml>=5.4.0
+Flask>=2.0.0
+Flask-Cors>=3.0.0

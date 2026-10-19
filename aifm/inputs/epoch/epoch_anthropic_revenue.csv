@@ -1,0 +1,16 @@
+company,date,annualized_revenue_usd,revenue_type,confidence,source_type,source_url,report_date
+Anthropic,2023-10-01,100000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/openai-rival-anthropic-in-talks-to-raise-2-billion-from-google-others-as-ai-arms-race-accelerates?rc=4ylmkj,2023-10-03
+Anthropic,2024-01-01,87000000,Annualized run rate,Confident,Company disclosure,https://www.anthropic.com/news/anthropic-expands-global-leadership-in-enterprise-ai-naming-chris-ciauri-as-managing-director-of,2025-09-26
+Anthropic,2024-12-31,1000000000,Annualized run rate,Likely,Media report,https://www.cnbc.com/2025/01/22/google-agrees-to-new-1-billion-investment-in-anthropic.html,2025-01-22
+Anthropic,2025-03-01,1400000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/anthropics-claude-drives-strong-revenue-growth-while-powering-manus-sensation?rc=9mzoog,2025-03-11
+Anthropic,2025-03-31,2000000000,Annualized run rate,Confident,Company disclosure,https://www.cnbc.com/2025/05/16/anthropic-ai-credit-facility.html,2025-05-16
+Anthropic,2025-05-30,3000000000,Annualized run rate,Likely,Media report,https://www.cnbc.com/2025/05/30/anthropic-hits-3-billion-in-annualized-revenue-on-business-demand-for-ai.html,2025-05-30
+Anthropic,2025-07-01,4000000000,Annualized run rate,Likely,Media report,https://www.theinformation.com/articles/anthropic-revenue-hits-4-billion-annual-pace-competition-cursor-intensifies?rc=9mzoog,2025-07-01
+Anthropic,2025-07-29,5000000000,Annual recurring revenue (ARR),Likely,Company disclosure,https://www.bloomberg.com/news/articles/2025-07-29/anthropic-nears-deal-to-raise-funding-at-170-billion-valuation,2025-07-29
+Anthropic,2025-10-21,7000000000,Annualized run rate,Confident,Company disclosure,https://www.anthropic.com/news/statement-dario-amodei-american-ai-leadership,2025-10-21
+Anthropic,2025-12-31,9000000000,Annualized run rate,Likely,Media report,https://www.bloomberg.com/news/articles/2026-01-21/anthropic-s-revenue-run-rate-tops-9-billion-as-vcs-pile-in,2026-01-21
+Anthropic,2026-02-12,14000000000,Annualized run rate,Confident,Company disclosure,https://www.anthropic.com/news/anthropic-raises-30-billion-series-g-funding-380-billion-post-money-valuation,2026-02-12
+Anthropic,2026-03-03,19000000000,Annualized run rate,Confident,"Company disclosure,Media report",https://x.com/apoorv03/status/2029018856342290550?s=20,2026-03-03
+Anthropic,2026-04-06,30000000000,Annualized run rate,Confident,Company disclosure,https://www.anthropic.com/news/google-broadcom-partnership-compute,2026-04-06
+Anthropic,2026-05-15,47000000000,Annualized run rate,Likely,Company disclosure,https://www.anthropic.com/news/series-h,2026-05-28
+Anthropic,2026-07-31,65000000000,Annualized run rate,Likely,Media report,https://www.bloomberg.com/news/articles/2026-08-17/anthropic-revenue-run-rate-surpasses-65-billion-ahead-of-ipo,2026-08-17

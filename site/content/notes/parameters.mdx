@@ -1,0 +1,279 @@
+---
+title: Model Parameters
+description: "Our estimates of the model's input parameters, each with its rationale."
+symbols: true
+---
+
+{/* A <Parameter> per parameter: its symbol and name, its estimate, its rationale, which readers unfold. Write the
+    rationale between the lines <td> and </td>, with a blank line after <td> and before </td>: then it takes paragraphs
+    and lists like the rest of the note. An empty rationale doesn't fold. */}
+
+Expand a parameter to see its rationale.
+
+<table className="parameter-table">
+<thead>
+<tr><th scope="col">Parameter</th><th scope="col">Estimate [p10; p90]</th></tr>
+</thead>
+<tbody>
+<tr><th scope="rowgroup" colSpan={3}>Full Trust</th></tr>
+
+<Parameter>
+<td>$m_C$ merged labs' compute, relative to AIFM's lab</td>
+<td><Value input="m_C" />×<Range input="m_C" /></td>
+<td>
+Anthropic + Google DeepMind + OpenAI have ~2.6x more compute than OpenAI alone. The compute input series used by AIFM is based on OpenAI, so we adjusted it.
+</td>
+</Parameter>
+
+<Parameter>
+<td>$m_L$ merged labs' staff, relative to AIFM's lab</td>
+<td><Value input="m_L" />×<Range input="m_L" /></td>
+<td>
+Anthropic + Google DeepMind + OpenAI have ~3.2x more staff than OpenAI alone. The staff input series used by AIFM is based on OpenAI, so we adjusted it.
+</td>
+</Parameter>
+
+<Parameter>
+<td>$s_{aut}$ share of compute running AI coders</td>
+<td><Value input="s_aut" /></td>
+<td>
+We keep it at the same 5% as in [AIFM](https://docs.google.com/document/d/1ru6Okbxb6XuH18Cz8439sdQJazMV39hNxsWDokh97r0/edit?tab=t.0#heading=h.z7ycqinxkjj6) for simplicity, but note that it is not optimal.
+
+When we let AI labs optimize their compute allocation to maximize AI safety work, they change $s_{aut}$ to anywhere between 0.3% and 20%, which adds up to 11% more AI safety work. We still keep it fixed, as in AIFM, and err on the boring side.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$s_{ext}$ share of compute serving external users</td>
+<td><Value input="s_ext" /><Range input="s_ext" /></td>
+<td>
+
+Compute serving external users is frozen at its level at the start of the pause, 38% of total compute. Since total compute keeps growing, the share allocated to external deployment shrinks over time.
+
+On the one hand, demand for models at the frozen intelligence level grows:
+
+- There is continuous adoption of AI.
+- When AI capabilities are frozen, building scaffolds makes more sense: there's no fear that GPT-7 will crush your startup.
+
+On the other hand, under normal, non-pause conditions, compute efficiency improves so fast that the cost of the same level of intelligence drops 10–40x a year, which easily covers the increased demand. However, in a pause world, we might ban all research leading to better efficiency.
+
+The uncertainty goes both ways, and neither direction affects experiment compute much, so we keep it fixed. This also matches the AI 2040 modeling.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$M$ compute of all projects, relative to the projects that became papers</td>
+<td><Value input="M" />×<Range input="M" /></td>
+<td>
+
+Some experiments fail, so a paper uses more compute than its described experiments add up to. We accounted for that when we estimated the papers' compute.
+
+But sometimes a whole research direction fails and is never published. We don't see it among the papers, so we account for it separately, through $M$. We use it twice:
+- For the 2025 AI safety field outside the AI labs, whose compute we take from papers (see [2025 AI safety work](note:safety2025)). We don't see failed papers, so we multiply the published papers' compute by $M$ to account for that.
+- For the labs in the pause. We smear compute for the failed experiments across papers, so their re-runs cost only $\kappa_c / M$.
+
+We guess it is no more than 1.25.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$C_s$ experiment compute of 2025 AI safety</td>
+<td><Value input="C_safety_2025" /> H100e<Range input="C_safety_2025" /></td>
+<td>
+See [2025 AI safety work](note:safety2025).
+</td>
+</Parameter>
+
+<Parameter>
+<td>$N_s$ researchers of 2025 AI safety</td>
+<td><Value input="L_safety_2025" /> FTE<Range input="L_safety_2025" /></td>
+<td>
+See [2025 AI safety work](note:safety2025).
+</td>
+</Parameter>
+
+<Parameter>
+<td>$RS_s$ a year's research stock of 2025 AI safety, from $C_s$ and $N_s$</td>
+<td><Value input="RS_safety_2025" /></td>
+<td>
+See [2025 AI safety work](note:safety2025).
+</td>
+</Parameter>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" colSpan={3}>Results Verification</th></tr>
+
+<Parameter>
+<td>$\alpha_v$ tail index of the papers' idea quality</td>
+<td><Value input="alpha" /><Range input="alpha" /></td>
+<td>
+
+A simple way to estimate the distribution of the papers' quality is to fit a Pareto distribution to their citations [@price1965networks; @redner1998popular; @peterson2010citations]. But citations mix up the quality of a paper's idea with the quality of its authors. The difference matters: after automation, only the AI's taste will be left, so the distribution should become flatter. To separate the two, we use the Q-model [@sinatra2016quantifying; @janosov2020success], which we fit to our [AI safety papers](note:aisafety-papers) dataset. We get $\alpha_v = 1.45$.
+
+We use α for the quality of a paper's idea, $v_i$, which doesn't depend on compute. But don't citations depend on compute? We checked: only slightly. The top 20% of papers by compute hold 30% of the citations, against 20% if compute didn't matter. Comparing only papers with similar compute gives almost the same α: 1.43. Also see [Chen et al., 2026](https://arxiv.org/abs/2608.21806): among NLP conference papers, the top 20% by GPUs hold 27–32% of the citations.
+
+Citations also reward being noticed: early citations bring more, whatever the paper is worth. So real contributions are probably less lopsided, α is likely higher, and the results where the labs check papers with their own staff are optimistic.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$n_s$ papers of 2025 AI safety</td>
+<td><Value input="n_s" /><Range input="n_s" /></td>
+<td>
+See [2025 AI safety work](note:safety2025).
+</td>
+</Parameter>
+
+<Parameter>
+<td>$\kappa_h$ time for a specialist who knows the relevant literature to check a paper, relative to making it in 2025</td>
+<td><Value input="kappa_h" /><Range input="kappa_h" /></td>
+<td>
+We count only human labor, not the time it takes to run reproduction experiments. The denominator is the total labor of all the paper's authors. In 2025, 0.02 corresponds to 20.7 hours per verifier.
+</td>
+</Parameter>
+
+<Parameter>
+<td>$p_h$ time a check gains for every tenfold more papers</td>
+<td><Value input="p_h" /> FTE-years<Range input="p_h" /></td>
+<td>
+
+The less verifiers know the field, the more prerequisites they have to read before they can check a paper. We assume that in 2025, verifiers could check papers from their own field without reading any prerequisites. But with so many AI-generated papers, their field grows in proportion to $n(t)$, so verifiers have to spend more time catching up with it.
+
+We aren't sure about this parameter. We tried to build a random graph model of the prerequisite dependencies among papers, but it was too complex. We still used it, together with historical paper trends, to calibrate our intuition. To reflect our uncertainty, we use a wide range and the point estimate that makes our results more boring.
+
+An FTE-year is 1,500 hours, so 0.00614 FTE-years add 9.21 hours to each check for every tenfold more papers.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$m_h$ verifiers per paper</td>
+<td><Value input="m_h" /><Range input="m_h" /></td>
+<td>
+It's a rather arbitrary modeling choice. We assume reproduction experiments will be run only once, but we think there might be several people carefully reviewing a paper.
+</td>
+</Parameter>
+
+<Parameter>
+<td>$\zeta_p$ return of a paper's research to its compute</td>
+<td><Value input="zeta_p" /><Range input="zeta_p" /></td>
+<td>
+
+From the paper count (27): in a year $t$ before 2025, when papers had the labor of 2025's papers, research per paper relative to 2025 is compute per paper relative to 2025, to the power $\zeta_p$:
+
+$$
+\zeta_p = \frac{\ln\big(RS_s(t) / RS_s\big) - \ln\big(n(t) / n_s\big)}{\ln\big(\bar c(t) / \bar c_s\big)}
+$$
+
+We took the papers $n(t)$ and their compute from our [AI safety papers dataset](note:aisafety-papers): $\bar c(t)$ is their average compute, dead ends included. We computed $RS_s(t)$ the way we compute $RS_s$: AIFM's $X$ at that year's compute, times $M$ for the failed projects, and people (scaled by the number of distinct authors), with that year's AI help.
+
+Against 2025, the years 2020 to 2024 give $\zeta_p$ in [0.21; 0.34]: 0.29, 0.21, 0.25, 0.25 and 0.34. We took the average, <Value input="zeta_p" />.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$l_\infty$ research of a paper with all the labor it can use, relative to a 2025 paper with the same compute</td>
+<td><Value input="l_inf" />×<Range input="l_inf" /></td>
+<td>
+
+Its bounds:
+- 1: labor can't make a paper worse.
+- 6.1: AIFM's own $X$ for the 2025 AI safety field with unlimited coders. One paper can't gain more than the whole field, as long as more labor never means fewer papers.
+
+We define a paper as a piece of research with a fixed human verification time, apart from studying its prerequisites. This limits how much labor you can squeeze into a paper given fixed compute and verification time. We don't have a better estimate, so we go with <Value input="l_inf" />×.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$\sigma_c$ spread of compute across papers, SD of its logarithm</td>
+<td><Value input="sigma_c" /><Range input="sigma_c" /></td>
+<td>
+We estimated it from our [AI safety papers dataset](note:aisafety-papers). In 2020–2025 the median compute grew 1.43× a year, and $\sigma_c$ was always within [2.52; 2.77], with no trend. Opus's estimates don't widen or narrow it: on the test papers they are spread as much as the authors' own figures (2.81 vs 2.85).
+</td>
+</Parameter>
+
+<Parameter>
+<td>$\kappa_c$ compute to re-run a paper</td>
+<td><Value input="kappa_c" /><Range input="kappa_c" /></td>
+<td>
+To verify a paper's main contribution, you likely need to re-run only a small number of experiments.
+</td>
+</Parameter>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" colSpan={3}>Compartmentalization</th></tr>
+
+<Parameter>
+<td>$w$ share of the researcher's taste that its plans carry</td>
+<td><Value input="w" /><Range input="w" /></td>
+<td>
+The AI researcher is likely superhuman at coding, so you might lose some research from not letting it write the code. On the other hand, it may be able to describe the experimental setup in enough detail for its plans to carry most of its taste to the AI engineer.
+</td>
+</Parameter>
+
+<Parameter>
+<td>$\kappa_p$ time for a specialist who knows the relevant literature to plan a paper, relative to making it in 2025</td>
+<td><Value input="kappa_p" /><Range input="kappa_p" /></td>
+<td>
+
+In 2025, 0.003 corresponds to 3.1 hours.
+
+It could be shorter. In Compartmentalization, the AI is better at AI R&D than almost any employee, so humans only check that plans have no dangerous instructions. A plan isn't a paper: it's just instructions for the AI engineer to implement a specific experiment, plus the rationale for why it's interesting. It's likely to be short.
+
+It could be longer. Some experiments may be hard to explain to the AI engineer, so the AI researcher would have to write a more detailed plan. Note that $\kappa_p$ assumes the human who reads the plan already knows the prerequisites to understand it. We account for those in $p_p$.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$p_p$ time a paper's planning gains for every tenfold more papers</td>
+<td><Value input="p_p" /> FTE-years<Range input="p_p" /></td>
+<td>
+
+The rationale is the same as for $p_h$. Here it's smaller because the human only needs to check that the plan is safe to hand to the AI engineer, without following all of its reasoning.
+
+An FTE-year is 1,500 hours, so 0.00461 FTE-years add 6.91 hours to each plan for every tenfold more papers.
+
+</td>
+</Parameter>
+</tbody>
+<tbody>
+<tr><th scope="rowgroup" colSpan={3}>Workload Approval</th></tr>
+
+<Parameter>
+<td>$\kappa_a$ time to approve code, relative to writing it</td>
+<td><Value input="kappa_a" /><Range input="kappa_a" /></td>
+<td>
+
+At Google, developers spend an average of 3.2 hours a 40-hour week reviewing their colleagues' code changes [@sadowski2018modern]. Auditors looking for hidden rule-breaking would read more slowly, so this is optimistic.
+
+</td>
+</Parameter>
+
+<Parameter>
+<td>$N_a$ auditors</td>
+<td><Value input="N_a" /> FTE</td>
+<td>
+
+Just like the number of verifiers, the number of auditors is both important and difficult to estimate. For verifiers, we studied two scenarios: hiring frozen at the start of the pause and unlimited hiring. This allowed us to measure how much we lose by not hiring.
+
+To simplify communication, we calculated a table for a specific number of auditors and then ran simulations for different numbers of auditors.
+
+Some considerations:
+
+- You need competent people who understand AI R&D code and can detect unsafe code. Given the breadth of AI R&D, you might need a lot of specialists in different areas.
+- There were ~20,000 NeurIPS reviewers in 2025.
+- Historically, the number of auditors for international treaties has ranged from hundreds to several thousand.
+
+For specificity, we fix it at a large but realistic number.
+
+</td>
+</Parameter>
+</tbody>
+</table>

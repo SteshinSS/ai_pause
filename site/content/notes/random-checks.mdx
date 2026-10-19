@@ -1,0 +1,31 @@
+---
+title: Random Checks
+symbols: true
+---
+
+In Results Verification, we have verifiers $N_v$ who check the papers. We assume they can distinguish which papers are the most important and check them first.
+In Compartmentalization, we also add $N_p$ research leads who design research plans with the AI researcher. We assume humans can't select which plans to check — they just take the ones the AI thinks are the most promising.
+
+We think this is realistic. New AI research will likely be built upon a subset of papers, while the rest is mostly forgotten. Verifiers can use citations to select the most important papers.
+
+But what if verifiers can't perfectly distinguish the most important papers? Out of curiosity, we modeled a situation in which verifiers check a random sample. Papers still differ in research effort $RE_i$, but on average a random share $q$ of them holds the share $q$ of their research effort and of their compute: $\varphi_h = \psi = q$.
+
+This also changes the labs' plans. When verifiers pick the best papers, the labs plan every round they can run, so that the verifiers have more to choose from. Now a planned paper that isn't verified is useless, so the labs plan only the papers they can verify. This reallocates more people to verification and reduces the review time (because fewer papers are written).
+
+We model this in Compartmentalization for 3- and 9-year pauses at <Milestone>SAR</Milestone>.
+
+<RandomChecks table="cells">
+
+Frozen hiring: the labs have only the staff they had at the start of the pause. Unlimited hiring: they hire the people they lack and check every paper, in either order.
+
+</RandomChecks>
+
+- In a three-year pause, nothing changes. For the first three and a half years, the labs' own staff plan and check every paper, so there is nothing to choose.
+- In a nine-year pause, the labs write papers faster than their staff can check them, and random checks lose almost 30% of the AI safety years.
+- With unlimited hiring, every paper is checked, so the order doesn't matter. But labs that check at random gain more from each hire: to match verifiers who pick the best papers with no hires at all, they have to hire 43,000 people, 80% of their own staff.
+
+<RandomChecks table="years">
+
+The nine-year pause with frozen hiring: the shares of the labs' papers and of their research effort that the verifiers check, at the start of the pause and after each year. A random sample holds the same share of both.
+
+</RandomChecks>

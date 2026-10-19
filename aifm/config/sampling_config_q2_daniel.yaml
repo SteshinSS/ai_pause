@@ -1,0 +1,122 @@
+# COMPLETE Q2 2026 sampling config — DANIEL's columns of the elicitation sheet.
+#
+# Three-way AC-anchor mixture over the sheet's blocks, at the sheet's
+# fractional weights:
+#     uplift-solved 0.5 / time-horizon 0.25 / revenue 0.25
+#
+# Each block carries its own elicitation vintage ("Present day" row of that
+# block), expressed with the per-observable reference dates:
+#     uplift   2026.578082   (uplift_reference_date, inherited from base)
+#     horizon  2026.269178   (horizon_reference_date)
+#     revenue  2026.374429   (revenue_reference_date)
+# The observable's value AND its per-year rate bind at that date on the
+# anchoring mapping. present_day (the simulation's "now": anchor stocks,
+# slope conversions, default date) is pinned to the newest vintage, matching
+# the 08-07-26 presets. ECI has no Q2 block, so eci_reference_date stays
+# unset (=> present_day).
+#
+# Inherits Daniel's non-anchor beliefs (taste block, include_gap, ted_ai_m2b,
+# 2200 time range) from sampling_config_daniel.yaml; only the Q2 anchor
+# blocks are (re)stated here.
+#
+# All triples verified log-symmetric (geomean(10th, 90th) = 50th) unless
+# noted, so each lognormal reproduces all three elicited quantiles exactly.
+
+parent: "sampling_config_daniel.yaml"
+
+parameters:
+  # Mixture over the sheet's three anchor blocks (fractional weights row).
+  ac_anchor_mode:
+    dist: choice
+    values: ["uplift-solved", "time-horizon", "revenue"]
+    p: [0.5, 0.25, 0.25]
+
+  # The simulation's "now" = the newest (uplift) vintage, per the Q2 sheet.
+  present_day:
+    dist: fixed
+    value: 2026.578082
+
+  # ------------------------------------------------------------------
+  # Uplift block (vintage 2026.578082, inherited uplift_reference_date)
+  # ------------------------------------------------------------------
+  # M*: serial coding uplift at the reference date. Lognormal over the EXCESS
+  # (M-1): Daniel's 1.25/2/5.00 => excess 0.25/1.0/4.0, geomean = 1.0 exactly.
+  # Overrides the base parent's Eli row ([0.1, 4.9]).
+  serial_uplift_at_reference_date:
+    dist: shifted_lognormal
+    ci80: [0.25, 4.0]
+    shift: 1.0
+    min: 1.01
+    max: 1000
+  # D: doubling time of the excess (M-1), months. Daniel 2.5/5/10, geomean 5.
+  excess_uplift_doubling_time:
+    dist: lognormal
+    ci80: [2.5, 10.0]
+    min: 0.6
+    max: 240
+  # Uplift-at-AC (4/20/121.33, "[fake version only]") deliberately NOT
+  # sampled: independent marginals lose ~51% of uplift rollouts to the
+  # reachable-floor infeasibility (see sampling_config_uplift_eli.yaml and
+  # scripts/scratch/feasibility_grid.py). L comes from the parent's
+  # automation_logistic_asymptote distribution.
+
+  # ------------------------------------------------------------------
+  # Time-horizon block (vintage 2026.269178)
+  # ------------------------------------------------------------------
+  horizon_reference_date:
+    dist: fixed
+    value: 2026.269178
+  # 3.1 hours = 186 minutes at the horizon vintage (50th only; shared row).
+  present_horizon:
+    dist: fixed
+    value: 186.0
+  # Present doubling time (months) 2.54/4/6.28 => years [0.2117, 0.5233],
+  # geomean 3.99 months. Same numbers as Daniel's previous config row.
+  present_doubling_time:
+    dist: lognormal
+    ci80: [0.2117, 0.5233]
+    min: 0.01
+    max: 2
+  # Doubling difficulty growth factor 0.82/0.92/1.02: identical to the base
+  # parent's row (normal, ci80 [0.82, 1.02]) — inherited, not restated.
+  #
+  # Time horizon required for AC: 0.05/1/20 WORK-years, converted at the base
+  # parent's convention of 120,000 minutes per work-year (Daniel's legacy row
+  # used [6228, 2491200], i.e. 124,560 min/work-year; the span is the same
+  # 0.05-20 work-years, only the minutes-per-work-year factor differs).
+  ac_time_horizon_minutes:
+    dist: lognormal
+    ci80: [6000, 2400000]
+    min: 960 # AC must have a time horizon of at least 16 hours, the longest existing METR task length
+    max: 1e11
+
+  # ------------------------------------------------------------------
+  # Revenue block (vintage 2026.374429)
+  # ------------------------------------------------------------------
+  # NOTE: revenue params are denominated in DOLLARS, not the sheet's
+  # trillions — converted below.
+  revenue_reference_date:
+    dist: fixed
+    value: 2026.374429
+  present_revenue:
+    dist: fixed
+    value: 4.7e10           # $0.047T annualized at the revenue vintage (50th only)
+  present_revenue_growth_rate:
+    dist: lognormal
+    ci80: [2.0, 12.5]       # growth FACTOR/yr, 2/5/12.5, geomean 5 exactly
+                            # (2026-08-10 sheet revision, same as Eli's row;
+                            # was 2.5/5/10)
+    min: 1.01
+    max: 100
+  revenue_required_for_ac:
+    dist: lognormal
+    ci80: [1.0e11, 1.0e13]  # $0.1T / $10T, median $1T exactly
+    # FLOOR: AC revenue must exceed what the leading company can already have
+    # by present_day under ANY growth draw: 4.7e10 (anchor, 2026.374429)
+    # x 12.5^(2026.578082-2026.374429) = 7.86e10 at the max growth factor 12.5.
+    # Without it, sub-anchor threshold draws date AC in the PAST (observed:
+    # 6.6% of Daniel revenue-mode rollouts, earliest 2023.7). Clipping puts
+    # that ~7% of mass at "AC just after present" instead.
+    min: 7.9e10
+    max: 1e16
+    clip_to_bounds: true    # spec min/max only bind when this is explicit

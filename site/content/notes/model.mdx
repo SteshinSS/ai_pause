@@ -1,0 +1,619 @@
+---
+title: AI Pause Model
+description: "The AI pause model's formulas: how much AI safety work AI produces during a pause, and how much of it humans can verify, under four verification protocols."
+companion: model-explanations
+numbered: true
+symbols: true
+---
+
+Open it side by side with the [explanations](note:model-explanations).
+
+Hover over a symbol to see its description. Red symbols are our estimates.
+
+# Full Trust
+
+<Backdrop id="full-trust" lift={0.23} />
+
+## Effective Compute
+
+<AifmOnly>
+
+$$
+\frac{dE}{dt} = C_{train}(t)\, S(t) \tag{1}
+$$
+
+</AifmOnly>
+
+$$
+E(t) \equiv E_p \tag{2}
+$$
+
+## Merged Labs
+
+$$
+\begin{aligned}
+C(t) &= m_C\, C^{\mathrm{AIFM}}(t) \\
+L_H &= m_L\, L_H^{\mathrm{AIFM}}(t_p)
+\end{aligned} \tag{3}
+$$
+
+## Compute Shares
+
+$$
+\begin{gathered}
+C = C_{train} + C_{xpm} + C_{aut} + C_{ext}
+\end{gathered} \tag{4}
+$$
+
+$$
+\begin{aligned}
+C_{train}(t) &= 0 \\
+C_{aut}(t) &= s_{aut}\, C(t) \\
+C_{ext} &= s_{ext}\, C(t_p) \\
+C_{xpm}(t) &= C(t) - C_{ext} - C_{aut}(t)
+\end{aligned} \tag{5}
+$$
+
+## Experiment Throughput
+
+### Coding Labor
+
+$$
+\begin{gathered}
+G_i = L_{H,i} + \eta_i\, C_{aut,i} \\
+L_C = \max \left(\int_0^1 G_i^{\rho_C}\, di\right)^{1/\rho_C}
+\end{gathered} \tag{6}
+$$
+
+$$
+\int_0^1 L_{H,i}\, di = L_H, \qquad \int_0^1 C_{aut,i}\, di = C_{aut} \tag{7}
+$$
+
+#### Automation
+
+$$
+A(E) = \min\left(1, \frac{A_\infty}{1 + e^{-k (\log E - x_0)}}\right) \tag{8}
+$$
+
+$$
+A(E_i) = i, \qquad A(E_{AC}) = 1 \tag{9}
+$$
+
+$$
+\eta_i(E) =
+\begin{cases}
+\eta_{init} \left(E / E_i\right)^{\eta_{slope}}, & i \le A(E) \\
+0, & i > A(E)
+\end{cases} \tag{10}
+$$
+
+### Experiment Throughput
+
+$$
+\begin{gathered}
+X = \Big[\alpha_X\, \tilde C_{xpm}^{\,\rho_X} + (1 - \alpha_X)\, \tilde L_C^{\,\rho_X}\Big]^{1/\rho_X} \\
+\tilde C_{xpm} = C_{xpm}^{\zeta}, \qquad \tilde L_C = L_C^{\lambda}
+\end{gathered} \tag{11}
+$$
+
+## Research Taste
+
+$$
+\begin{gathered}
+T_{AI}^{SD}(E) = T_{AC}^{SD} + s_T \left(\log E - \log E_{AC}\right) \\
+T_{AI}(E) = T_H\big(T_{AI}^{SD}(E)\big) \\
+T(E) = \mathbb{E}_Z\Big[\max\big(T_H(Z), T_{AI}(E)\big)\Big] \\
+Z \sim \mathcal{N}(0, 1)
+\end{gathered} \tag{12}
+$$
+
+## Research Effort
+
+$$
+RE = T X \tag{13}
+$$
+
+## Research Stock
+
+$$
+RS(t) = \int_{-\infty}^{t} RE\, dt' \tag{14}
+$$
+
+<AifmOnly>
+
+$$
+S = \left(\frac{RS}{RS_0}\right)^{1/\beta} \tag{15}
+$$
+
+</AifmOnly>
+
+## Results
+
+$$
+RS_s = X\big(C_s, L_C(N_s, C_{aut,s}, E_{2025})\big) \tag{16}
+$$
+
+$$
+\text{cell} = \frac{RS(t_p + D) - RS(t_p)}{RS_s} = \frac{1}{RS_s} \int_{t_p}^{t_p + D} RE\, dt \tag{17}
+$$
+
+<ResultTable model="full trust">
+AI safety work produced in a Full Trust pause, in years of the whole 2025 AI safety field's work.
+</ResultTable>
+
+# Results Verification
+
+<Flow label="How a paper's compute, research, idea quality and review time add up to the labs' totals and to verified research" ledger>
+<div data-node="staff" data-to="research verifiers" className="flow-left"><span className="flow-label">Staff (18)</span>$L_H = N_e + N_v$</div>
+<div data-node="compute" data-to="research" className="flow-right"><span className="flow-label">Compute (18)</span>$C_{xpm} = C_e + C_r$</div>
+<div data-node="research" data-to="paper" className="flow-wide"><span className="flow-label">Research (19), (20)</span>$X_e$, with taste $T(E_p, N_e)$</div>
+<div className="flow-left flow-head"><span className="flow-label">All papers</span>$\sum_{i=1}^{n}$</div>
+<div data-node="paper" className="flow-card">
+<div><span className="flow-label">Paper (22)</span>$i = 1, \dots, n$</div>
+<div data-node="paper-count" data-to="count checked"><span className="flow-label">Count</span>$1$</div>
+<div data-node="paper-compute" data-to="exploration reruns"><span className="flow-label">Compute (24)</span>$c_i$</div>
+<div data-node="paper-research" data-to="research-sum"><span className="flow-label">Research (24)</span>$r_i = r_s\, l_\infty (c_i / \bar c_s)^{\zeta_p}$</div>
+<div><span className="flow-label">Idea quality (30)</span>$v_i$</div>
+<div data-node="paper-effort" data-to="effort verified"><span className="flow-label">Research effort (30)</span>$RE_i = T v_i r_i$</div>
+<div data-node="paper-review" data-to="review verifiers"><span className="flow-label">Review time (25)</span>$m_h \tau$</div>
+</div>
+<div className="flow-right flow-head"><span className="flow-label">Checked papers (31)</span>$\sum_{i=1}^{n} \chi_i$</div>
+<div data-node="count" className="flow-left"><span className="flow-label">Papers (29)</span>$n$</div>
+<div data-node="checked" className="flow-right"><span className="flow-label">Checked (30)</span>$q\, n$</div>
+<div data-node="exploration" className="flow-left"><span className="flow-label">Exploration (22)</span>$C_e / M$</div>
+<div data-node="reruns" data-to="compute" className="flow-right"><span className="flow-label">Re-runs (34)</span>$C_r = \kappa_c \psi\, C_e / M$</div>
+<div data-node="research-sum" className="flow-left"><span className="flow-label">Research (22)</span>$X_e$</div>
+<div className="flow-right" />
+<div className="flow-left" />
+<div className="flow-right" />
+<div data-node="effort" className="flow-left"><span className="flow-label">Research effort (30)</span>$RE_e = T X_e$</div>
+<div data-node="verified" className="flow-right flow-out"><span className="flow-label">Verified (21)</span>$RE^v = \varphi_h RE_e$</div>
+<div data-node="review" className="flow-left"><span className="flow-label">Review work (26)</span>$W = m_h n \tau$</div>
+<div data-node="verifiers" className="flow-right"><span className="flow-label">Verifiers (30)</span>$q\, W \le N_v$</div>
+<figcaption>The labs pick the $N_e$ with the most $RE^v$ (35). With unlimited hiring (36)–(37), every paper is checked.</figcaption>
+</Flow>
+
+## Splits
+
+$$
+\begin{gathered}
+C_{xpm} = C_e + C_r \\
+L_H = N_e + N_v
+\end{gathered} \tag{18}
+$$
+
+## Research
+
+$$
+X_e = X\big(C_e, L_C(N_e, C_{aut}, E_p)\big) \tag{19}
+$$
+
+### Taste
+
+$$
+\begin{gathered}
+T(E, N_e) = T_{AI}(E) + \int_{\hat z}^{\infty} \max\big(T_H(z) - T_{AI}(E), 0\big)\, d\Phi(z) \\
+\hat z = \Phi^{-1}\left(1 - \frac{N_e}{L_H}\right), \qquad T(E, L_H) = T(E)
+\end{gathered} \tag{20}
+$$
+
+## Verified Research
+
+$$
+\begin{gathered}
+RE_e = T(E_p, N_e)\, X_e \\
+RE^v = \varphi_h\, RE_e
+\end{gathered} \tag{21}
+$$
+
+## Papers
+
+$$
+X_e = \sum_{i=1}^{n} r_i, \qquad C_e = M \sum_{i=1}^{n} c_i = M n \bar c \tag{22}
+$$
+
+<NotInModel>
+
+$$
+\begin{gathered}
+r_i = r_s \left[l_\infty^{\rho_p} \left(\frac{c_i}{\bar c_s}\right)^{\zeta_p \rho_p} + c_\infty^{\rho_p} \left(\frac{l_i}{\bar l_s}\right)^{\lambda \rho_p}\right]^{1/\rho_p} \\
+l_\infty^{\rho_p} + c_\infty^{\rho_p} = 1 \\
+\rho_p < 0, \quad l_i \to \infty: \qquad r_i \to r_s \left[l_\infty^{\rho_p} \left(\frac{c_i}{\bar c_s}\right)^{\zeta_p \rho_p}\right]^{1/\rho_p}
+\end{gathered} \tag{23}
+$$
+
+</NotInModel>
+
+$$
+\begin{gathered}
+r_i = r_s\, l_\infty \left(\frac{c_i}{\bar c_s}\right)^{\zeta_p} \\
+\ln c_i \sim \mathcal{N}\left(\ln \bar c - \frac{\sigma_c^2}{2}, \sigma_c^2\right)
+\end{gathered} \tag{24}
+$$
+
+<Doodle id="equations" x={0.42} y={0.5} width={0.65} turn={-7} />
+
+## Review Work
+
+$$
+\begin{gathered}
+t_s = \frac{N_s}{n_s} \\
+\tau = \kappa_h t_s + p_h \log_{10} \frac{n}{n_s}
+\end{gathered} \tag{25}
+$$
+
+$$
+W = m_h\, n\, \tau = m_h N_s\, \frac{n}{n_s} \left(\kappa_h + \frac{p_h}{t_s} \log_{10} \frac{n}{n_s}\right) \tag{26}
+$$
+
+## Paper Count
+
+$$
+k_X = \frac{X_e}{X_s} = \underbrace{\frac{n}{n_s}}_{\substack{\text{paper count} \\ \text{vs 2025}}} \cdot \underbrace{l_\infty \left(\frac{\bar c}{\bar c_s}\right)^{\zeta_p}}_{\substack{\text{research per paper} \\ \text{vs 2025}}} \tag{27}
+$$
+
+<Derivation id="paper-count">
+
+$$
+\begin{gather*}
+X_e = r_s\, l_\infty \sum_{i=1}^{n} \left(\frac{\bar c}{\bar c_s} \cdot \frac{c_i}{\bar c}\right)^{\zeta_p} \\
+= n\, r_s\, l_\infty \left(\frac{\bar c}{\bar c_s}\right)^{\zeta_p} \mathbb{E}_e\left[\left(\frac{c_i}{\bar c}\right)^{\zeta_p}\right] \tag{27a} \\
+X_s = r_s \sum_{i=1}^{n_s} \left(\frac{c_i}{\bar c_s}\right)^{\zeta_p} = n_s\, r_s\, \mathbb{E}_s\left[\left(\frac{c_i}{\bar c_s}\right)^{\zeta_p}\right] \tag{27b} \\
+\mathbb{E}_e\left[\left(\frac{c_i}{\bar c}\right)^{\zeta_p}\right] = \mathbb{E}_s\left[\left(\frac{c_i}{\bar c_s}\right)^{\zeta_p}\right] = e^{-\zeta_p (1 - \zeta_p) \sigma_c^2 / 2} \tag{27c}
+\end{gather*}
+$$
+
+</Derivation>
+
+$$
+\frac{\bar c}{\bar c_s} = \frac{C_e / (M n)}{C_s / (M n_s)} = \frac{k_C}{n / n_s}, \qquad k_C = \frac{C_e}{C_s} \tag{28}
+$$
+
+$$
+\frac{n}{n_s} = \left(\frac{k_X}{l_\infty k_C^{\zeta_p}}\right)^{1/(1 - \zeta_p)} \tag{29}
+$$
+
+<Derivation id="paper-count-solve">
+
+$$
+\begin{gather*}
+k_X = \frac{n}{n_s}\, l_\infty \left(\frac{k_C}{n / n_s}\right)^{\zeta_p} = l_\infty\, k_C^{\zeta_p} \left(\frac{n}{n_s}\right)^{1 - \zeta_p} \tag{29a} \\
+\left(\frac{n}{n_s}\right)^{1 - \zeta_p} = \frac{k_X}{l_\infty k_C^{\zeta_p}} \tag{29b}
+\end{gather*}
+$$
+
+</Derivation>
+
+<PaperCountPlot>
+<span data-axis>papers a year $n$</span>
+<span data-dataset>our dataset</span>
+
+Number of papers $n(t)$ during the pause. Dots are the AI safety papers in [our dataset](note:aisafety-papers).
+
+</PaperCountPlot>
+
+## Reviewer Budget
+
+$$
+\begin{gathered}
+q = \min\left(1, \frac{N_v}{W}\right) \\
+v_i \sim \mathrm{Pareto}(v_m, \alpha_v), \qquad \mathbb{E}[v_i] = 1 \\
+RE_i = T v_i r_i, \qquad \sum_{i=1}^{n} RE_i = T X_e = RE_e
+\end{gathered} \tag{30}
+$$
+
+<PilePlot>
+<span data-axis="v">idea quality $v_i$</span>
+<span data-axis="c">compute $c_i$</span>
+<span data-axis="h">research effort $RE_i$</span>
+<span data-sea>the bar</span>
+<span data-share="q">papers $q$</span>
+<span data-share="phi">research effort $\varphi_h$</span>
+<span data-share="psi">compute $\psi$</span>
+
+Each dot is a simulated paper, lying on the surface of research effort over its idea quality and compute. The verifiers check the papers above the bar.
+
+</PilePlot>
+
+## Top Papers
+
+$$
+\begin{gathered}
+\chi_i =
+\begin{cases}
+1, & RE_i \text{ among the top } q \text{ of the papers} \\
+0, & \text{otherwise}
+\end{cases} \\
+\varphi_h(q) = \dfrac{\sum_{i=1}^{n} \chi_i\, RE_i}{\sum_{i=1}^{n} RE_i} \\[4pt]
+\psi(q) = \dfrac{\sum_{i=1}^{n} \chi_i\, c_i}{\sum_{i=1}^{n} c_i}
+\end{gathered} \tag{31}
+$$
+
+$$
+\begin{gathered}
+\ln RE_i = \ln K + \frac{\varepsilon_i}{\alpha_v} + \sigma_y \xi_i \\
+\varepsilon_i \sim \mathrm{Exp}(1), \qquad \xi_i \sim \mathcal{N}(0, 1), \qquad \sigma_y = \zeta_p \sigma_c \\
+K = T r_s\, l_\infty\, v_m \left(\frac{\tilde c}{\bar c_s}\right)^{\zeta_p}, \qquad \tilde c = \bar c\, e^{-\sigma_c^2 / 2}
+\end{gathered} \tag{32}
+$$
+
+<Derivation id="top-papers-research">
+
+$$
+\begin{gather*}
+\mathbb{P}(v_i \ge v) = \left(\frac{v_m}{v}\right)^{\alpha_v} = \mathbb{P}\left(\varepsilon_i \ge \alpha_v \ln \frac{v}{v_m}\right) \\
+v_i = v_m e^{\varepsilon_i / \alpha_v} \tag{32a} \\
+c_i = \tilde c\, e^{\sigma_c \xi_i} \tag{32b} \\
+RE_i = T v_i r_s\, l_\infty \left(\frac{c_i}{\bar c_s}\right)^{\zeta_p} \\
+= K e^{\varepsilon_i / \alpha_v} e^{\zeta_p \sigma_c \xi_i} \tag{32c}
+\end{gather*}
+$$
+
+</Derivation>
+
+$$
+\begin{aligned}
+\chi_i = 1 &\iff \frac{\varepsilon_i}{\alpha_v} + \sigma_y \xi_i \ge u \\
+G(x, a) &= \Phi\left(-\frac{x}{\sigma_y}\right) \\
+&\quad + e^{-a x + a^2 \sigma_y^2 / 2}\, \Phi\left(\frac{x}{\sigma_y} - a \sigma_y\right) \\
+q &= G(u, \alpha_v) \\
+\psi &= G(u - \sigma_y \sigma_c, \alpha_v) \\
+\varphi_h &= G(u - \sigma_y^2, \alpha_v - 1)
+\end{aligned} \tag{33}
+$$
+
+<Derivation id="top-papers-closed">
+
+$$
+\begin{gather*}
+q = \mathbb{E}[\chi_i], \qquad \psi = \frac{\mathbb{E}[\chi_i c_i]}{\mathbb{E}[c_i]} \\
+\varphi_h = \frac{\mathbb{E}[\chi_i RE_i]}{\mathbb{E}[RE_i]} \tag{33a} \\
+G(x, a) = \mathbb{P}\left(\frac{\varepsilon_i}{a} + \sigma_y \xi_i \ge x\right) \\
+= \mathbb{E}\left[\min\left(1, e^{-a (x - \sigma_y \xi_i)}\right)\right] \tag{33b} \\
+\mathbb{E}\left[f(\xi_i)\, e^{\delta \xi_i - \delta^2 / 2}\right] = \mathbb{E}\left[f(\xi_i + \delta)\right] \tag{33c} \\
+\mathbb{E}\left[\mathbf{1}[\sigma_y \xi_i < x]\, e^{a \sigma_y \xi_i}\right] \\
+= e^{a^2 \sigma_y^2 / 2}\, \Phi\left(\frac{x}{\sigma_y} - a \sigma_y\right) \tag{33d} \\
+v\, \frac{\alpha_v v_m^{\alpha_v}}{v^{\alpha_v + 1}} = \frac{(\alpha_v - 1)\, v_m^{\alpha_v - 1}}{v^{\alpha_v}}, \qquad v_m = 1 - \frac{1}{\alpha_v} \tag{33e} \\
+\frac{c_i}{\mathbb{E}[c_i]} = e^{\sigma_c \xi_i - \sigma_c^2 / 2} \\
+\frac{RE_i}{\mathbb{E}[RE_i]} = v_i\, e^{\sigma_y \xi_i - \sigma_y^2 / 2} \tag{33f}
+\end{gather*}
+$$
+
+</Derivation>
+
+## Compute Budget
+
+$$
+\begin{gathered}
+C_r = \kappa_c \sum_{i=1}^{n} \chi_i c_i = \frac{\kappa_c}{M} \psi C_e \\
+C_e \left(1 + \frac{\kappa_c}{M} \psi\right) = C_{xpm}
+\end{gathered} \tag{34}
+$$
+
+## Best Split
+
+$$
+\max_{N_e} RE^v \tag{35}
+$$
+
+## Unlimited Hiring
+
+$$
+\begin{gathered}
+N_h = \max\big(0, N_e + W - L_H\big) \\
+N_v = \min\big(W, L_H - N_e\big)
+\end{gathered} \tag{36}
+$$
+
+$$
+\begin{gathered}
+\varphi_h = \psi = 1 \\
+C_e = \frac{C_{xpm}}{1 + \kappa_c / M}, \qquad RE^v = RE_e
+\end{gathered} \tag{37}
+$$
+
+## Table
+
+$$
+\text{cell} =
+\begin{cases}
+\text{Full Trust (17)}, & E_p < E_{AC} \\[4pt]
+\dfrac{1}{RS_s} \displaystyle\int_{t_p}^{t_p + D} RE^v\, dt, & E_p \ge E_{AC}
+\end{cases} \tag{38}
+$$
+
+<ResultTable model="verified" toggle>
+Only research that humans reviewed and reproduced counts. Gray numbers are Full Trust's: before AC there is nothing to verify.
+</ResultTable>
+
+# Compartmentalization
+
+<Flow label="How a paper's compute, research, idea quality, planning and review time add up over the planned and the checked papers" ledger>
+<div data-node="staff" data-to="planning verifiers" className="flow-left"><span className="flow-label">Staff (39)</span>$N_p + N_v \le L_H$</div>
+<div data-node="compute" data-to="research" className="flow-right"><span className="flow-label">Compute (39)</span>$C_{xpm} = C_e + C_r$</div>
+<div data-node="research" data-to="paper" className="flow-wide"><span className="flow-label">Research (40), (41)</span>$X_e$ at $E_{AC}$, with taste $T_w$</div>
+<div className="flow-left flow-head"><span className="flow-label">Planned papers (45)</span>a random $q_p$</div>
+<div data-node="paper" className="flow-card">
+<div><span className="flow-label">Paper (22)</span>$i = 1, \dots, n$</div>
+<div data-node="paper-count" data-to="planned checked"><span className="flow-label">Count</span>$1$</div>
+<div data-node="paper-compute" data-to="exploration reruns"><span className="flow-label">Compute (24)</span>$c_i$</div>
+<div data-node="paper-research" data-to="research-sum"><span className="flow-label">Research (24)</span>$r_i = r_s\, l_\infty (c_i / \bar c_s)^{\zeta_p}$</div>
+<div><span className="flow-label">Idea quality (30)</span>$v_i$</div>
+<div data-node="paper-effort" data-to="effort verified"><span className="flow-label">Research effort (43)</span>$RE_i = T_w v_i r_i$</div>
+<div data-node="paper-planning" data-to="planning"><span className="flow-label">Planning time (42)</span>$m_p \tau_p$</div>
+<div data-node="paper-review" data-to="review verifiers"><span className="flow-label">Review time (42)</span>$m_h \tau$</div>
+</div>
+<div className="flow-right flow-head"><span className="flow-label">Checked papers (45)</span>the top $q / q_p$</div>
+<div data-node="planned" className="flow-left"><span className="flow-label">Planned (45)</span>$F = q_p n$</div>
+<div data-node="checked" className="flow-right"><span className="flow-label">Checked (45)</span>$V = q\, n$</div>
+<div data-node="exploration" className="flow-left"><span className="flow-label">Exploration (47)</span>$q_p C_e / M$</div>
+<div data-node="reruns" data-to="compute" className="flow-right"><span className="flow-label">Re-runs (47)</span>$C_r = \kappa_c q_p \psi\, C_e / M$</div>
+<div data-node="research-sum" className="flow-left"><span className="flow-label">Research (43)</span>$q_p X_e$</div>
+<div className="flow-right" />
+<div className="flow-left" />
+<div className="flow-right" />
+<div data-node="effort" className="flow-left"><span className="flow-label">Research effort (46)</span>$q_p T_w X_e$</div>
+<div data-node="verified" className="flow-right flow-out"><span className="flow-label">Verified (46)</span>$RE^v = q_p \varphi_h T_w X_e$</div>
+<div data-node="planning" className="flow-left"><span className="flow-label">Planners (42)</span>$N_p = F m_p \tau_p$</div>
+<div className="flow-right" />
+<div data-node="review" className="flow-left"><span className="flow-label">Review work (42)</span>$F m_h \tau$</div>
+<div data-node="verifiers" className="flow-right"><span className="flow-label">Verifiers (42)</span>$V m_h \tau \le N_v$</div>
+<figcaption>Verifiers check the top $q / q_p$ of the planned papers, so $\varphi_h$ and $\psi$ are taken at $q / q_p$. The labs split the staff by (48). With unlimited hiring (49)–(50), every paper is planned and checked.</figcaption>
+</Flow>
+
+## Splits
+
+$$
+\begin{gathered}
+N_e \to 0 \\
+N_p + N_v \le L_H \\
+C_{xpm} = C_e + C_r
+\end{gathered} \tag{39}
+$$
+
+## Research
+
+$$
+X_e = X\big(C_e, L_C(0, C_{aut}, E_{AC})\big) \tag{40}
+$$
+
+### Taste
+
+$$
+\begin{gathered}
+T(E, 0) = T_{AI}(E) \\
+T_w = (1 - w)\, T_{AI}(E_{AC}) + w\, T_{AI}(E_p)
+\end{gathered} \tag{41}
+$$
+
+## Plans and Checks
+
+$$
+\begin{gathered}
+F = \min\left(n, \frac{N_p}{m_p \tau_p}\right), \qquad V = \min\left(F, \frac{N_v}{m_h \tau}\right) \\
+m_p \tau_p = \kappa_p t_s + p_p \log_{10} \frac{F}{n_s}, \qquad \tau = \kappa_h t_s + p_h \log_{10} \frac{F}{n_s}
+\end{gathered} \tag{42}
+$$
+
+## Verified Research
+
+$$
+\begin{gathered}
+RE^v = \varphi_h\left(\frac{V}{F}\right) F\, T_w \bar r \\
+\bar r = \frac{X_e}{n}
+\end{gathered} \tag{43}
+$$
+
+## Planning Work
+
+$$
+W_p = n\, m_p \tau_p \big|_{F = n} = N_s\, \frac{n}{n_s} \left(\kappa_p + \frac{p_p}{t_s} \log_{10} \frac{n}{n_s}\right) \tag{44}
+$$
+
+$$
+\begin{gathered}
+q_p = \frac{F}{n}, \qquad q_p = 1 \iff N_p \ge W_p \\
+q = \frac{V}{n} = \min\left(q_p, \frac{N_v}{n\, m_h \tau}\right)
+\end{gathered} \tag{45}
+$$
+
+$$
+\begin{gathered}
+RE^v = q_p\, \varphi_h\left(\frac{q}{q_p}\right) T_w X_e \\
+G(u, \alpha_v) = \frac{q}{q_p} \\
+\varphi_h = G(u - \sigma_y^2, \alpha_v - 1), \qquad \psi = G(u - \sigma_y \sigma_c, \alpha_v)
+\end{gathered} \tag{46}
+$$
+
+## Compute Budget
+
+$$
+\begin{gathered}
+C_r = \frac{\kappa_c}{M}\, q_p\, \psi\left(\frac{q}{q_p}\right) C_e \\
+C_e \left(1 + \frac{\kappa_c}{M}\, q_p\, \psi\left(\frac{q}{q_p}\right)\right) = C_{xpm}
+\end{gathered} \tag{47}
+$$
+
+## Planning vs Verifying
+
+$$
+\max_{N_p} RE^v \tag{48}
+$$
+
+## Unlimited Hiring
+
+$$
+N_h = \max\big(0, W_p + W - L_H\big) \tag{49}
+$$
+
+$$
+\begin{gathered}
+q_p = q = 1 \\
+C_e = \frac{C_{xpm}}{1 + \kappa_c / M}, \qquad RE^v = T_w X_e \\
+N_p + N_v = \min\big(L_H, W_p + W\big)
+\end{gathered} \tag{50}
+$$
+
+## Table
+
+$$
+\text{cell} =
+\begin{cases}
+\text{Results Verification (38)}, & E_p < E_{SAR} \\[4pt]
+\dfrac{1}{RS_s} \displaystyle\int_{t_p}^{t_p + D} RE^v\, dt, & E_p \ge E_{SAR}
+\end{cases} \tag{51}
+$$
+
+<ResultTable model="compartmentalized" toggle>
+Only research that humans planned, reviewed and reproduced counts. Gray numbers are Results Verification's: before SAR there is nothing to compartmentalize. The main page shows this table.
+</ResultTable>
+
+# Workload Approval
+
+<Flow label="How the auditors' reading time caps the coding labor that runs">
+<div data-node="coding" data-to="approved"><span className="flow-label">Engineer's coding labor (40)</span>$L_C(0, C_{aut}, E_{AC})$</div>
+<div data-node="auditors" data-to="approved"><span className="flow-label">Auditors (52)</span>$N_a$, of the $W_a$ needed</div>
+<div data-node="approved" data-to="research" className="flow-wide"><span className="flow-label">Approved coding labor (52)</span>$L_C^a$</div>
+<div data-node="research" data-to="verified" className="flow-wide"><span className="flow-label">Research (53)</span>$X_e = X(C_e, L_C^a)$</div>
+<div data-node="verified" className="flow-wide flow-out"><span className="flow-label">Verified (46)</span>$RE^v = q_p\, \varphi_h(q / q_p)\, T_w X_e$</div>
+<figcaption>From the research on, everything is as in Compartmentalization (41)–(50).</figcaption>
+</Flow>
+
+## Approval
+
+$$
+\begin{gathered}
+W_a = \kappa_a\, L_C(0, C_{aut}, E_{AC}) \\
+L_C^a = \min\left(L_C(0, C_{aut}, E_{AC}), \frac{N_a}{\kappa_a}\right)
+\end{gathered} \tag{52}
+$$
+
+## Research
+
+$$
+X_e = X\big(C_e, L_C^a\big) \tag{53}
+$$
+
+## Table
+
+$$
+\text{cell} =
+\begin{cases}
+\text{Compartmentalization (51)}, & E_p < E_{SAR} \\[4pt]
+\dfrac{1}{RS_s} \displaystyle\int_{t_p}^{t_p + D} RE^v\, dt, & E_p \ge E_{SAR}
+\end{cases} \tag{54}
+$$
+
+<ResultTable model="approved" toggle>
+Only research that humans planned, approved, reviewed and reproduced counts. Gray numbers are Results Verification's: before SAR there is nothing to compartmentalize.
+</ResultTable>
+
+## Number of Auditors
+
+<AuditorCurve>
+<span data-axis>AI safety years</span>
+<span data-x>auditors $N_a$</span>
+
+AI safety years with $N_a$ auditors. Dots mark the table's <Value input="N_a" /> auditors.
+
+</AuditorCurve>

@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "defaultSimulation": "daniel-08-16-26",
+  "simulations": [
+    {
+      "id": "eli-12-29-25",
+      "label": "Eli - 12-29-25",
+      "forecaster": "Eli",
+      "date": "12-29-25",
+      "customIdentifier": null,
+      "dataPath": "simulations/eli-12-29-25",
+      "numSamples": 10000,
+      "modelVersion": "1.1"
+    },
+    {
+      "id": "daniel-12-29-25",
+      "label": "Daniel - 12-29-25",
+      "forecaster": "Daniel",
+      "date": "12-29-25",
+      "customIdentifier": null,
+      "dataPath": "simulations/daniel-12-29-25",
+      "numSamples": 10000,
+      "modelVersion": "1.1"
+    },
+    {
+      "id": "eli-12-31-25",
+      "label": "Eli - 12-31-25",
+      "forecaster": "Eli",
+      "date": "12-31-25",
+      "customIdentifier": null,
+      "dataPath": "simulations/eli-12-31-25",
+      "numSamples": 10000,
+      "modelVersion": "1.2"
+    },
+    {
+      "id": "daniel-12-31-25",
+      "label": "Daniel - 12-31-25",
+      "forecaster": "Daniel",
+      "date": "12-31-25",
+      "customIdentifier": null,
+      "dataPath": "simulations/daniel-12-31-25",
+      "numSamples": 10000,
+      "modelVersion": "1.2"
+    },
+    {
+      "id": "eli-01-26-26",
+      "label": "Eli - 01-26-26",
+      "forecaster": "Eli",
+      "date": "01-26-26",
+      "customIdentifier": null,
+      "dataPath": "simulations/eli-01-26-26",
+      "numSamples": 10000,
+      "modelVersion": null
+    },
+    {
+      "id": "daniel-01-26-26",
+      "label": "Daniel - 01-26-26",
+      "forecaster": "Daniel",
+      "date": "01-26-26",
+      "customIdentifier": null,
+      "dataPath": "simulations/daniel-01-26-26",
+      "numSamples": 10000,
+      "modelVersion": "null"
+    },
+    {
+      "id": "eli-04-02-26",
+      "label": "Eli - 04-02-26",
+      "forecaster": "Eli",
+      "date": "04-02-26",
+      "customIdentifier": null,
+      "dataPath": "simulations/eli-04-02-26",
+      "numSamples": 10000,
+      "modelVersion": null
+    },
+    {
+      "id": "daniel-04-02-26",
+      "label": "Daniel - 04-02-26",
+      "forecaster": "Daniel",
+      "date": "04-02-26",
+      "customIdentifier": null,
+      "dataPath": "simulations/daniel-04-02-26",
+      "numSamples": 10000,
+      "modelVersion": null
+    },
+    {
+      "id": "daniel-08-16-26",
+      "label": "Daniel - 08-16-26",
+      "forecaster": "Daniel",
+      "date": "08-16-26",
+      "customIdentifier": null,
+      "dataPath": "simulations/daniel-08-16-26",
+      "numSamples": 10000,
+      "modelVersion": null
+    },
+    {
+      "id": "eli-08-16-26",
+      "label": "Eli - 08-16-26",
+      "forecaster": "Eli",
+      "date": "08-16-26",
+      "customIdentifier": null,
+      "dataPath": "simulations/eli-08-16-26",
+      "numSamples": 10000,
+      "modelVersion": null
+    },
+    {
+      "id": "brendan-08-16-26",
+      "label": "Brendan - 08-16-26",
+      "forecaster": "Brendan",
+      "date": "08-16-26",
+      "customIdentifier": null,
+      "dataPath": "simulations/brendan-08-16-26",
+      "numSamples": 10000,
+      "modelVersion": null
+    }
+  ]
+}

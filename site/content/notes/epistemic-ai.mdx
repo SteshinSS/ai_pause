@@ -1,0 +1,143 @@
+---
+title: Epistemic AI Projects
+---
+
+We give two recommendations on increasing the efficiency of human verifiers to get the most out of AI safety research during the pause. Verifier Uplift changes how AI research is presented and checked. Better Abstractions changes the concepts the research is built on.
+
+## Verifier Uplift
+
+Develop tools and methodologies to make adversarial review shorter for human verifiers.
+
+ML conferences are already a great testbed for adversarial review. Scientists try to make their work look more impressive than it is and hope that reviewers won't read the code.
+
+**Formats.** There has been a lot of research on alternative scientific media to make sharing and reading research easier. But it seems that academic incentives don't always reward clarity [@olah2017debt]. Clarity might make papers look less impressive to peer reviewers.
+
+If, during an AI pause, research is done by AI, we might care less about impressiveness and status attribution, and more about findings. If we reward verifiers for finding errors in AI research, it incentivizes clarity.
+
+Figure out what media formats make it easier for human researchers to find errors and bugs in ML research. Run experiments with real researchers. Maybe collect human feedback data and use it to train AI that is clearer in scientific communication.
+
+**Tools.** Build scaffolds over weaker trusted models to check and dumb down ML research: both papers and code. Build a tool to help human reviewers find bugs and wrong statements quicker. Use this tool to scan existing famous papers and their repositories. Can you find new errors in famous papers? If you can demonstrate it, you are likely to gain the trust of conference reviewers.
+
+## Better Abstractions
+
+As AI does research autonomously, it will come up with new abstractions. They won't necessarily be elegant to human minds. In fact, they aren't in 2026. Tristan Buckmaster, one of the disputed coauthors of the AI-assisted Navier–Stokes work, wrote: "I can say the first LLM generated proof Levent sent me was the most horrendous I have ever read" [@buckmaster2026statement].
+
+It's not a big deal for incremental science such as solving Millennium Prize Problems, but it can be a problem for the ambitious challenge of understanding AI. Bad abstractions might slow down human verifiers, increase verification time, and decrease the amount of verified research.
+
+We think the epistemic AI and math communities can already tackle this problem by creating benchmarks that measure how readable AI-generated abstractions are to people. It might be neglected, as AI labs racing to win the capabilities race have much less incentive to solve it.
+
+We are not sure of these two recommendations, because they are dual-use. In the absence of a pause, they might help labs do dangerous capabilities research.
+
+## Economic Impact
+These projects boil down to decreasing:
+- Paper's verification time for a specialist who knows the field: $\kappa_h$
+- Time to read the prerequisites of a paper or plan: $p_h$, $p_p$
+
+How impactful is it? We estimate it in several ways for Compartmentalization with a nine-year pause from SAR.
+
+### Verifier Salaries
+
+Say a verifier earns \$140,300 a year, the median wage of computer and information research scientists in the US in May 2025, the occupation of ML researchers ([BLS](https://www.bls.gov/ooh/computer-and-information-technology/computer-and-information-research-scientists.htm)). This is optimistic: AI labs pay far more, and an employee costs an organization more than their salary. We take it to get a lower bound on the economic impact.
+- If hiring is frozen, a cut adds research. We price it at the salaries of the hires that would add as much.
+- If hiring is unlimited, the lab checks every paper anyway, so a cut adds no research but saves salaries.
+
+<figure className="result-table">
+<div className="result-table-scroll">
+<table>
+<thead>
+<tr><th scope="col" rowSpan={1}>Cut</th><th scope="col">Extra research, frozen hiring</th><th scope="col">Salaries of hires that add as much</th><th scope="col">Salaries saved, unlimited hiring</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">$\kappa_h$ −10%</th><td>+1.1%</td><td>\$1.5B</td><td>\$3.6B</td></tr>
+<tr><th scope="row">$\kappa_h$ −50%</th><td>+5.8%</td><td>\$8.5B</td><td>\$17B</td></tr>
+<tr><th scope="row">$p_h$ −10%</th><td>+1.1%</td><td>\$1.5B</td><td>\$3.6B</td></tr>
+<tr><th scope="row">$p_h$ −50%</th><td>+5.9%</td><td>\$8.6B</td><td>\$17B</td></tr>
+<tr><th scope="row">$p_p$ −10%</th><td>+0.8%</td><td>\$1.1B</td><td>\$900M</td></tr>
+<tr><th scope="row">$p_p$ −50%</th><td>+3.8%</td><td>\$5.3B</td><td>\$4.5B</td></tr>
+</tbody>
+</table>
+</div>
+<figcaption>Compartmentalization, nine-year pause from SAR. Salaries at \$140,300 a verifier-year.</figcaption>
+</figure>
+
+### Doublings
+
+Salaries ignore diminishing returns. Note that helping verifiers adds only a few percent of extra research. Is it worth it?
+
+Instead, let's assume that every doubling of AI safety research is worth the same. We estimate how much it cost to double AI safety research in 2020–2025 and use that to estimate the economic impact of reducing the verification time.
+
+Our [dataset](note:aisafety-papers) gives the people and compute of AI safety research in every year from 2020 to 2025, and so the research done each year, counted like [2025's](note:safety2025). We also need the total AI safety research done before 2020. Since it grew 1.4× a year in 2020–2025, we extrapolate it back at that rate.
+
+<figure className="result-table">
+<div className="result-table-scroll">
+<table>
+<thead>
+<tr><th scope="col" rowSpan={1}>Year</th><th scope="col">Research done, AI safety 2025-years</th><th scope="col">All research so far</th><th scope="col">Doublings</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">2020</th><td>0.18</td><td>0.61</td><td>0.50</td></tr>
+<tr><th scope="row">2021</th><td>0.25</td><td>0.86</td><td>0.50</td></tr>
+<tr><th scope="row">2022</th><td>0.28</td><td>1.14</td><td>0.41</td></tr>
+<tr><th scope="row">2023</th><td>0.40</td><td>1.54</td><td>0.43</td></tr>
+<tr><th scope="row">2024</th><td>0.60</td><td>2.14</td><td>0.47</td></tr>
+<tr><th scope="row">2025</th><td>1.00</td><td>3.14</td><td>0.55</td></tr>
+<tr><th scope="row">2020–2025</th><td>2.71</td><td></td><td>2.87</td></tr>
+</tbody>
+</table>
+</div>
+<figcaption>All research so far: everything done since the field began, at the end of the year. Doublings: how many times the year doubled it.</figcaption>
+</figure>
+
+It's hard to estimate how much the world spends on AI safety. Labs don't disclose their safety budgets, and academics are paid from general research grants. We try two ways. Remember that we are interested in a lower bound, so we use pessimistic estimates.
+
+**People and compute.** We price the people and compute of our dataset:
+- An FTE-year costs \$62,652, what NIH pays a new postdoc in the US ([FASEB](https://faseb.org/journals-and-news/washington-update/nih-issues-updated-nrsa-stipend-levels-extends-esi-eligibility)). That's much less than ML researchers earn, but more than postdocs earn in most countries.
+- An H100-hour costs \$2.50 in 2025, between the marketplace and neocloud rental prices of [Silicon Data](https://www.silicondata.com/blog/h100-rental-price-over-time). It was twice as expensive 2.1 years earlier, as FLOP per dollar of ML GPUs doubles every 2.1 years ([Epoch AI](https://epoch.ai/blog/trends-in-machine-learning-hardware)).
+
+**Online estimates.** Stephen McAleese tallied the grants of the major AI safety funders, such as Open Philanthropy and the Survival and Flourishing Fund ([McAleese](https://www.lesswrong.com/posts/WGpFFJo2uFe5ssgEb/an-overview-of-the-ai-safety-funding-situation)). His tally ends in 2024. In 2025, a single funder, Coefficient Giving (formerly Open Philanthropy), gave over \$400M ([80,000 Hours](https://80000hours.org/career-reviews/ai-safety-grantmaking/)). These estimates leave out the labs' own safety teams, governments and most academic research, and their AI safety is narrower than ours: research on risks from advanced AI. So they likely underestimate what our dataset counts.
+
+<figure className="result-table">
+<div className="result-table-scroll">
+<table>
+<thead>
+<tr><th scope="col" rowSpan={1}>Year</th><th scope="col">Spent: people and compute</th><th scope="col">Spent: online estimates</th><th scope="col">Price of a doubling: people and compute</th><th scope="col">Price of a doubling: online estimates</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">2020</th><td>\$237M</td><td>\$21M</td><td>\$474M</td><td>\$42M</td></tr>
+<tr><th scope="row">2021</th><td>\$308M</td><td>\$134M</td><td>\$612M</td><td>\$267M</td></tr>
+<tr><th scope="row">2022</th><td>\$296M</td><td>\$126M</td><td>\$723M</td><td>\$307M</td></tr>
+<tr><th scope="row">2023</th><td>\$391M</td><td>\$116M</td><td>\$905M</td><td>\$269M</td></tr>
+<tr><th scope="row">2024</th><td>\$572M</td><td>\$111M</td><td>\$1.2B</td><td>\$234M</td></tr>
+<tr><th scope="row">2025</th><td>\$915M</td><td>\$400M+</td><td>\$1.7B</td><td>\$720M+</td></tr>
+<tr><th scope="row">2020–2025</th><td>\$2.7B</td><td>\$910M+</td><td>\$950M</td><td>\$320M+</td></tr>
+</tbody>
+</table>
+</div>
+<figcaption>Price of a doubling: what the year spent, divided by its doublings. Online estimates: McAleese's tally in 2020–2024, Coefficient Giving alone in 2025.</figcaption>
+</figure>
+
+For each method, we average the price of a doubling over 2020–2025: \$950M counting people and compute, and about \$320M by online estimates.
+
+Using these prices, we get a lower bound on the economic impact:
+
+<figure className="result-table">
+<div className="result-table-scroll">
+<table>
+<thead>
+<tr><th scope="col" rowSpan={1}>Cut</th><th scope="col">Doublings</th><th scope="col">Value: people and compute</th><th scope="col">Value: online estimates</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">$\kappa_h$ −10%</th><td>0.016</td><td>\$15M</td><td>\$4.9M</td></tr>
+<tr><th scope="row">$\kappa_h$ −50%</th><td>0.082</td><td>\$78M</td><td>\$26M</td></tr>
+<tr><th scope="row">$p_h$ −10%</th><td>0.016</td><td>\$15M</td><td>\$4.9M</td></tr>
+<tr><th scope="row">$p_h$ −50%</th><td>0.082</td><td>\$78M</td><td>\$26M</td></tr>
+<tr><th scope="row">$p_p$ −10%</th><td>0.012</td><td>\$11M</td><td>\$3.7M</td></tr>
+<tr><th scope="row">$p_p$ −50%</th><td>0.053</td><td>\$50M</td><td>\$17M</td></tr>
+</tbody>
+</table>
+</div>
+<figcaption>Compartmentalization, nine-year pause from SAR. Doublings priced at their 2020–2025 average prices.</figcaption>
+</figure>
+
+These epistemic AI projects could likely be done for under \$10M, so they seem worth doing.
+

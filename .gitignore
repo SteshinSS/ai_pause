@@ -1,0 +1,8 @@
+.venv/
+.claude
+__pycache__/
+*.py[cod]
+.pytest_cache/
+outputs/
+safety_papers/data/
+.DS_Store

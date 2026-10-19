@@ -1,0 +1,45 @@
+{
+  "name": "pause-site",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "check": "node scripts/check-links.mjs",
+    "supplement": "node scripts/supplement.mjs",
+    "pdf": "node scripts/pdf.mjs",
+    "build": "node scripts/check-links.mjs && tsc -b && vite build && node scripts/prerender.mjs",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/newsreader": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "katex": "0.16.47",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@citation-js/core": "0.9.0",
+    "@citation-js/plugin-bibtex": "0.9.0",
+    "@mdx-js/rollup": "3.1.1",
+    "@types/mdx": "2.0.14",
+    "@types/node": "24.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "mdast-util-gfm-footnote": "2.1.0",
+    "micromark-extension-gfm-footnote": "2.1.0",
+    "oxlint": "1.85.0",
+    "rehype-katex": "7.0.1",
+    "remark-frontmatter": "5.0.0",
+    "remark-math": "6.0.0",
+    "remark-mdx-frontmatter": "6.0.0",
+    "typescript": "6.0.3",
+    "vfile": "6.0.3",
+    "vite": "8.3.1"
+  },
+  "engines": {
+    "node": ">=22.12 <23"
+  }
+}

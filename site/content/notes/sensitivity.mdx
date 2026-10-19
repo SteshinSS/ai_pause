@@ -1,0 +1,53 @@
+---
+title: Sensitivity Analysis
+symbols: true
+---
+
+For sensitivity analysis, we draw tornado plots. We fix all the parameters at their point estimates, move one parameter at a time to its 10th or 90th percentile and see how this changes AI safety work or the number of verifiers to hire.
+
+We do this for only one scenario, the one we think is the most interesting: Compartmentalization, 9 years, at SAR. For AI safety work, we use frozen hiring.
+
+## Our Inputs
+
+We set their 10th and 90th percentiles ourselves. $RS_s$ is computed from $C_s$ and $N_s$, so it moves with them. For the rationale, see [parameters](note:parameters).
+
+<Tornado set="ours">
+<span data-input="m_C" data-name="merged labs' compute">$m_C$</span>
+<span data-input="m_L" data-name="merged labs' staff">$m_L$</span>
+<span data-input="s_ext" data-name="share of compute serving external users">$s_{ext}$</span>
+<span data-input="M" data-name="compute of all projects, relative to papers">$M$</span>
+<span data-input="C_safety_2025" data-name="experiment compute of 2025 AI safety">$C_s$</span>
+<span data-input="L_safety_2025" data-name="researchers of 2025 AI safety">$N_s$</span>
+<span data-input="n_s" data-name="papers of 2025 AI safety">$n_s$</span>
+<span data-input="kappa_h" data-name="time to check a paper, relative to making it">$\kappa_h$</span>
+<span data-input="p_h" data-name="time a check gains for every tenfold more papers">$p_h$</span>
+<span data-input="m_h" data-name="verifiers per paper">$m_h$</span>
+<span data-input="zeta_p" data-name="return of a paper's research to its compute">$\zeta_p$</span>
+<span data-input="l_inf" data-name="research of a paper with all the labor it can use">$l_\infty$</span>
+<span data-input="sigma_c" data-name="spread of compute across papers">$\sigma_c$</span>
+<span data-input="alpha" data-name="tail index of the papers' idea quality">$\alpha_v$</span>
+<span data-input="kappa_c" data-name="compute to re-run a paper, relative to making it">$\kappa_c$</span>
+<span data-input="kappa_p" data-name="time to plan a paper, relative to making it">$\kappa_p$</span>
+<span data-input="p_p" data-name="time a paper's planning gains for every tenfold more papers">$p_p$</span>
+<span data-input="w" data-name="share of the researcher's taste that its plans carry">$w$</span>
+<span data-input="kappa_a" data-name="time to approve code, relative to writing it">$\kappa_a$</span>
+
+Our inputs, one at a time at their 10th and 90th percentiles. Under each name: its 10th and 90th percentiles.
+
+</Tornado>
+
+## AIFM Parameters
+
+We take Eli Lifland's AIFM preset and his point estimates.
+
+<Tornado set="aifm">
+<span data-input="rho_coding_labor" data-name="Coding Labor Substitutability">$\rho_C$</span>
+<span data-input="automation_logistic_asymptote" data-name="Coding Automation Fraction Logistic Asymptote">$A_\infty$</span>
+<span data-input="coding_automation_efficiency_slope" data-name="Coding Automation Efficiency Improvement Factor">$\eta_{slope}$</span>
+<span data-input="parallel_penalty" data-name="Parallel Penalty">$\lambda$</span>
+<span data-input="ai_research_taste_at_coding_automation_anchor_sd" data-name="Automated Research Taste at AC">$T_{AC}^{SD}$</span>
+<span data-input="ai_research_taste_slope" data-name="Automated Research Taste Slope">$s_T$</span>
+
+AIFM's parameters, one at a time at the 10th and 90th percentiles of Eli Lifland's distributions. When both ends move the result the same way, the thinner bar lies on the longer one. A bar that reaches 0: the labs' own staff plan and check every paper.
+
+</Tornado>

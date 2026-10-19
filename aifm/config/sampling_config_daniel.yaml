@@ -1,0 +1,95 @@
+# Daniel's sampling configuration
+# Inherits all settings from sampling_config.yaml and overrides specific parameters
+
+parent: "sampling_config.yaml"
+
+# Global settings (time_range, input_data, per_sample_timeout, num_rollouts) are
+# inherited from sampling_config.yaml. Override them here only to diverge from it.
+
+# ============================================================================
+# PARAMETER OVERRIDES
+# ============================================================================
+# To override parameters, uncomment the 'parameters:' section below and add
+# the specific parameters you want to change.
+#
+# Example usage:
+#
+# parameters:
+#   present_day:
+#     dist: fixed
+#     value: 2026.0
+#   include_gap:
+#     dist: choice
+#     values: ["no gap", "gap"]
+#     p: [0.3, 0.7]  # 70% chance of gap instead of 55%
+#
+# ============================================================================
+
+parameters:
+  ac_time_horizon_minutes:
+      dist: lognormal
+      ci80: [6228, 2491200] # [0.05 work years, 20 work years]
+      min: 960 # demand that superhuman coder have a time horizon of at least 16 hours, which is the length of the longest existing METR tasks
+      max: 1e11
+  present_doubling_time:
+      dist: lognormal
+      ci80: [0.2117, 0.5233] # [2.54, 6.28] months, 4 month median
+      min: 0.01
+      max: 2
+  include_gap:
+    dist: fixed
+    value: "no gap"
+  ai_research_taste_at_coding_automation_anchor_sd:
+    dist: normal
+    ci80: [-3, 3]
+    min: -10
+    max: 10
+  median_to_top_taste_multiplier:
+    dist: shifted_lognormal
+    ci80: [0.8, 11]
+    shift: 1.0
+    min: 1.01
+    max: 100
+  ai_research_taste_slope:
+    dist: lognormal
+    ci80: [1, 9]
+    clip_to_bounds: false
+  ted_ai_m2b: 
+    dist: lognormal
+    ci80: [0.2673, 3.742] # median 1, x3.742
+    min: 0.01
+    max: 100
+  taste_limit:
+    dist: lognormal
+    ci80: [4, 64] # median 16, x4
+    min: 0
+    max: 100
+
+# ============================================================================
+# TIME SERIES PARAMETER OVERRIDES
+# ============================================================================
+# To override time series parameters:
+#
+# time_series_parameters:
+#   slowdown_year:
+#     dist: uniform
+#     min: 2024.0
+#     max: 2027.0
+#
+# ============================================================================
+
+# ============================================================================
+# CORRELATION MATRIX OVERRIDE
+# ============================================================================
+# To override the correlation matrix (replaces entire matrix):
+#
+# correlation_matrix:
+#   parameters:
+#     - "present_doubling_time"
+#     - "doubling_difficulty_growth_factor"
+#   correlation_matrix:
+#     - [1.00, 0.50]
+#     - [0.50, 1.00]
+#   correlation_type: "spearman"
+#
+# ============================================================================

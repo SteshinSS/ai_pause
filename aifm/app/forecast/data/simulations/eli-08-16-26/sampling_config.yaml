@@ -1,0 +1,335 @@
+correlation_matrix:
+  correlation_matrix:
+  - - 1.0
+    - 0.6
+    - -0.3
+    - 0.0
+    - 0.0
+    - 0.0
+    - -0.15
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.6
+    - 1.0
+    - -0.3
+    - 0.0
+    - 0.3
+    - -0.5
+    - -0.1
+    - 0.0
+    - 0.0
+    - 0.0
+  - - -0.3
+    - -0.3
+    - 1.0
+    - 0.3
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - -0.2
+  - - 0.0
+    - 0.0
+    - 0.3
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.3
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - -0.5
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - -0.15
+    - -0.1
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.5
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.5
+    - 1.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - -0.2
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+  correlation_type: spearman
+  parameters:
+  - present_doubling_time
+  - doubling_difficulty_growth_factor
+  - ai_research_taste_slope
+  - ai_research_taste_at_coding_automation_anchor_sd
+  - gap_years
+  - ac_time_horizon_minutes
+  - coding_automation_efficiency_slope
+  - inv_compute_anchor_exp_cap
+  - inf_compute_asymptote
+  - median_to_top_taste_multiplier
+initial_progress: 0.0
+input_data: /root/aifm_daniel_run/inputs/2200.csv
+num_rollouts: 1000
+num_samples: 10000
+parameters:
+  ac_anchor_mode:
+    dist: choice
+    p:
+    - 0.6
+    - 0.2
+    - 0.2
+    values:
+    - uplift-solved
+    - time-horizon
+    - revenue
+  ac_time_horizon_minutes:
+    ci80:
+    - 12000
+    - 1.875e10
+    dist: lognormal
+    max: 1e11
+    min: 960
+  ai_research_taste_at_coding_automation_anchor_sd:
+    ci80:
+    - -2.5
+    - 3.5
+    dist: normal
+    max: 10
+    min: -10
+  ai_research_taste_slope:
+    ci80:
+    - 0.8
+    - 6.6125
+    dist: lognormal
+    max: 10
+    min: 0.1
+  automation_interp_type:
+    dist: fixed
+    value: logistic
+  automation_logistic_asymptote:
+    ci80:
+    - 0.005
+    - 2
+    dist: shifted_lognormal
+    max: 1e30
+    min: 1.0
+    shift: 1.0
+  coding_automation_efficiency_slope:
+    ci80:
+    - 1
+    - 9
+    dist: lognormal
+    max: 10
+    min: 0.1
+  doubling_difficulty_growth_factor:
+    ci80:
+    - 0.82
+    - 1.02
+    dist: normal
+    max: 1.02
+    min: 0.6
+  excess_uplift_doubling_time:
+    ci80:
+    - 2.0
+    - 21.13
+    dist: lognormal
+    max: 240
+    min: 0.6
+  gap_years:
+    ci80:
+    - 0.1
+    - 4.9
+    dist: lognormal
+    max: 1e30
+    min: 0.0
+  horizon_extrapolation_type:
+    dist: fixed
+    value: decaying doubling time
+  horizon_reference_date:
+    dist: fixed
+    value: 2026.269178
+  include_gap:
+    dist: choice
+    p:
+    - 0.7
+    - 0.3
+    values:
+    - no gap
+    - gap
+  inf_compute_asymptote:
+    ci80:
+    - 25
+    - 40000
+    dist: shifted_lognormal
+    max: 1e7
+    min: 1.0
+    shift: 1.0
+  inf_labor_asymptote:
+    ci80:
+    - 1
+    - 200
+    dist: shifted_lognormal
+    max: 1e5
+    min: 1.0
+    shift: 1.0
+  inv_compute_anchor_exp_cap:
+    ci80:
+    - 0.7
+    - 4.6
+    dist: shifted_lognormal
+    max: 10
+    min: 1.0
+    shift: 1.0
+  max_serial_coding_labor_multiplier:
+    ci80:
+    - 1e4
+    - 1e12
+    dist: lognormal
+    max: 1e30
+    min: 1.0
+  median_to_top_taste_multiplier:
+    ci80:
+    - 0.8
+    - 11.25
+    dist: shifted_lognormal
+    max: 100
+    min: 1.01
+    shift: 1.0
+  parallel_penalty:
+    alpha: 3
+    beta: 3
+    dist: beta
+    max: 1.0
+    min: 0.0
+  present_day:
+    dist: fixed
+    value: 2026.578082
+  present_doubling_time:
+    ci80:
+    - 0.1833
+    - 0.7667
+    dist: lognormal
+    max: 2
+    min: 0.01
+  present_horizon:
+    dist: fixed
+    value: 186.0
+  present_revenue:
+    dist: fixed
+    value: 4.7e10
+  present_revenue_growth_rate:
+    ci80:
+    - 2.0
+    - 12.5
+    dist: lognormal
+    max: 100
+    min: 1.01
+  revenue_reference_date:
+    dist: fixed
+    value: 2026.374429
+  revenue_required_for_ac:
+    ci80:
+    - 2.0e11
+    - 2.45e14
+    clip_to_bounds: true
+    dist: lognormal
+    max: 1e16
+    min: 7.9e10
+  rho_coding_labor:
+    dist: choice
+    p:
+    - 0.25
+    - 0.5
+    - 0.25
+    values:
+    - -5
+    - -2
+    - -1
+  serial_uplift_at_reference_date:
+    ci80:
+    - 0.1
+    - 4.9
+    dist: shifted_lognormal
+    max: 1000
+    min: 1.01
+    shift: 1.0
+  software_progress_rate_at_reference_year:
+    ci80:
+    - 0.4
+    - 2.5
+    dist: lognormal
+    max: 10
+    min: 0.05
+  taste_limit:
+    ci80:
+    - 2
+    - 32
+    dist: lognormal
+    max: 100
+    min: 0
+  taste_limit_smoothing:
+    alpha: 2
+    beta: 2
+    dist: beta
+    max: 0.999
+    min: 0.001
+  ted_ai_m2b:
+    ci80:
+    - 0.4
+    - 5.6
+    dist: lognormal
+    max: 100
+    min: 0.01
+  uplift_reference_date:
+    dist: fixed
+    value: 2026.578082
+per_sample_timeout: 30.0
+seed: 20260810
+time_range:
+- 2017.0
+- 2200.0
