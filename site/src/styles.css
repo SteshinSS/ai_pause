@@ -1515,6 +1515,18 @@ button {
   content: none;
 }
 
+/* The acknowledgements: a paragraph after the names, smaller and gray, closing the title block. */
+.authors ul:has(+ p) {
+  margin-bottom: 1.2em;
+}
+
+.pane-body .authors p {
+  margin: 0 0 3.2em;
+  font-size: 0.8em;
+  text-align: center;
+  color: var(--muted);
+}
+
 /* ---------- result table (ResultTable.tsx) ---------- */
 
 .result-table {
